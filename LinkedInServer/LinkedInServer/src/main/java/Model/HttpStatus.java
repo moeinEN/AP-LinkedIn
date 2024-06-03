@@ -1,4 +1,4 @@
-package Http;
+package Model;
 
 public enum HttpStatus {
     CONTINUE(100, "Continue"),
