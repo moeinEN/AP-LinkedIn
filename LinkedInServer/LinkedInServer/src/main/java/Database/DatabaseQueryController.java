@@ -1,0 +1,104 @@
+package Database;
+
+import Model.Messages;
+import Model.User;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Objects;
+
+public class DatabaseQueryController {
+    private static void createTable (String script) throws SQLException {
+        Connection db = null;
+        Statement stmt = null;
+        db = DbController.getConnection();
+        db.setAutoCommit(true);
+        stmt = db.createStatement();
+        try {
+            stmt.execute(script);
+            stmt.close();
+        } catch ( Exception e ) {
+            e.printStackTrace();
+        }
+        finally {
+            db.close();
+        }
+    }
+    public static void createTableUsers() throws SQLException {
+        String sql = "CREATE TABLE USER (\n" +
+                "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
+                "    username VARCHAR(255) UNIQUE,\n" +
+                "    password VARCHAR(255),\n" +
+                "    email VARCHAR(255) UNIQUE\n" +
+                ");";
+        createTable(sql);
+    }
+    public static User getUser(String username) throws SQLException {
+        String sql = String.format("SELECT * FROM USER WHERE username = '%s';", username);
+        Connection db = null;
+        Statement stmt = null;
+        db = DbController.getConnection();
+        db.setAutoCommit(true);
+        stmt = db.createStatement();
+        try {
+            ResultSet rs = stmt.executeQuery(sql);
+            if (Objects.isNull(rs)) {
+                return null;
+            }
+            User user = new User();
+            while (rs.next()) {
+                user.setId(rs.getInt("id"));
+                user.setUsername(rs.getString("username"));
+                user.setPassword(rs.getString("password"));
+                user.setEmail(rs.getString("email"));
+            }
+            return user;
+        } catch ( Exception e ) {
+            e.printStackTrace();
+            return null;
+        }
+        finally {
+            stmt.close();
+            db.close();
+        }
+    }
+    public static Messages addUser(String username, String password, String email) {
+        try {
+            Connection db = null;
+            Statement stmt = null;
+            db = DbController.getConnection();
+            db.setAutoCommit(true);
+            stmt = db.createStatement();
+
+            String usernameCheckSql = String.format("SELECT * FROM USER WHERE username = '%s'", username);
+            ResultSet userRs = stmt.executeQuery(usernameCheckSql);
+            if(userRs.next()) {
+                return Messages.TAKEN_USERNAME;
+            }
+
+            String emailCheckSql = String.format("SELECT * FROM USER WHERE email = '%s'", email);
+            ResultSet emailRs = stmt.executeQuery(emailCheckSql);
+            if(emailRs.next()) {
+                return Messages.EMAIL_EXISTS;
+            }
+
+            String sql = String.format("INSERT INTO USER (username, password, email) VALUES ('%s', '%s', '%s');", username, password, email);
+
+            try {
+                stmt.executeUpdate(sql);
+                return Messages.SUCCESS;
+            } catch ( Exception e ) {
+                e.printStackTrace();
+                return Messages.INTERNAL_ERROR;
+            } finally {
+                stmt.close();
+                db.close();
+            }
+        } catch( Exception e ) {
+            e.printStackTrace();
+            return Messages.INTERNAL_ERROR;
+        }
+    }
+}
