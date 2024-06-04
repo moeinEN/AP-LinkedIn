@@ -1,5 +1,7 @@
 package Controller;
 
+import Model.Cookies;
+import Model.LoginCredentials;
 import Model.Messages;
 import Model.RegisterCredentials;
 import Service.UserService;
@@ -46,5 +48,25 @@ public class RetrofitBuilder {
             ex.printStackTrace();
             return Messages.INTERNAL_ERROR;
         }
+    }
+    public Messages syncCallLogin(LoginCredentials loginCredentials) {
+        UserService service = retrofit.create(UserService.class);
+        Call<ResponseBody> callLogin = service.login(loginCredentials);
+        String responseString;
+        try {
+            Response<ResponseBody> response = callLogin.execute();
+            if (response.isSuccessful() && response.body() != null) {
+                byte[] responseBodyBytes = response.body().bytes();
+                Gson gson = new Gson();
+                responseString = gson.fromJson(new String(responseBodyBytes), String.class);
+                Cookies.setSessionToken(responseString);
+            } else {
+                return Messages.INTERNAL_ERROR;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return Messages.INTERNAL_ERROR;
+        }
+        return Messages.USER_LOGGED_IN_SUCCESSFULLY;
     }
 }
