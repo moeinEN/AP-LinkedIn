@@ -1,10 +1,12 @@
 package Service;
 
 import Model.LoginCredentials;
+import Model.Profile;
 import Model.RegisterCredentials;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.Header;
 import retrofit2.http.POST;
 
 public interface UserService {
@@ -13,4 +15,7 @@ public interface UserService {
 
     @POST("/login")
     Call<ResponseBody> login(@Body LoginCredentials loginCredentials);
+
+    @POST("/user/profile")
+    Call<ResponseBody> profile(@Body Profile profile, @Header("sessionToken") String sessionToken);
 }
