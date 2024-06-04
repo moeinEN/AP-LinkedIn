@@ -1,8 +1,14 @@
 package Controller;
 
+import Model.Messages;
+import Model.RegisterCredentials;
+import Service.UserService;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import okhttp3.OkHttpClient;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -23,4 +29,22 @@ public class RetrofitBuilder {
         return retrofit;
     }
     private Retrofit retrofit = retrofitBuilder();
+
+    public Messages syncCallSignUp(RegisterCredentials registerCredentials){
+        UserService service = retrofit.create(UserService.class);
+        Call<ResponseBody> callSync = service.signUp(registerCredentials);
+
+        try {
+            Response<ResponseBody> response = callSync.execute();
+            if (response.isSuccessful() && response.body() != null) {
+                byte[] responseBodyBytes = response.body().bytes();
+                return Messages.fromByte(responseBodyBytes);
+            } else {
+                return Messages.INTERNAL_ERROR;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return Messages.INTERNAL_ERROR;
+        }
+    }
 }
