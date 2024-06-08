@@ -17,12 +17,33 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 
+import static Database.DatabaseQueryController.*;
+
 public class Main {
 
     public static void main(String[] args) throws Exception {
         //DatabaseQueryController.createTableUsers();
 
-        // Create HTTP server listening on port 8080
+        //Create HTTP server listening on port 8080
+        createTableProfile();
+        createTableProfileJob();
+        createTableProfileHeader();
+        createTableProfileEducation();
+        createTableProfileContactsInfo();
+        createTableCertificate();
+        createTableComments();
+        createTableLikes();
+        createTablePosts();
+        createTableConnections();
+        createTableProfileSports();
+        createTableProfileVoluntaryActivities();
+        createTableProfileExperience();
+        createTableProfileSkills();
+        createTableProfileOrganizations();
+//
+
+
+
         HttpServer httpServer = HttpHandler.makeConnectionPoint("localhost", 8080);
         HttpHandler.createContext(httpServer);
     }

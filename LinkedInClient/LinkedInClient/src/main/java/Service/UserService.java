@@ -1,21 +1,37 @@
 package Service;
 
-import Model.LoginCredentials;
-import Model.Profile;
-import Model.RegisterCredentials;
+import Model.Requests.LoginCredentials;
+import Model.Requests.CreateProfileRequest;
+import Model.Requests.RegisterCredentials;
+import Model.User;
+import com.google.gson.JsonObject;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
-import retrofit2.http.Body;
-import retrofit2.http.Header;
-import retrofit2.http.POST;
+import retrofit2.http.*;
+
+import java.util.List;
 
 public interface UserService {
+
+    @POST("/add/{username}")
+    public Call<User> addUser(@Path("username") String username, @Body User user);
+
+    //test endpoint
+    @GET("/hello")
+    public Call<JsonObject> sayHello();
+
+    @GET("/users")
+    public Call<List<User>> getUsers();
+
+    @GET("/users/{username}")
+    public Call<User> getUser(@Path("username") String username);
+
     @POST("/user/register")
-    public Call<ResponseBody> signUp(@Body RegisterCredentials registerCredentials);
+    Call<ResponseBody> signUp(@Body RegisterCredentials registerCredentials);
 
     @POST("/login")
     Call<ResponseBody> login(@Body LoginCredentials loginCredentials);
 
     @POST("/user/profile")
-    Call<ResponseBody> profile(@Body Profile profile, @Header("sessionToken") String sessionToken);
+    Call<ResponseBody> profile(@Body CreateProfileRequest profile, @Header("sessionToken") String sessionToken);
 }

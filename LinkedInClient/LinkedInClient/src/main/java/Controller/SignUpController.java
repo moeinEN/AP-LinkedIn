@@ -1,7 +1,6 @@
-package Controllers;
+package Controller;
 
 import Model.Messages;
-import Model.User;
 
 public class SignUpController {
     // Validate email address : example@gmail.com
