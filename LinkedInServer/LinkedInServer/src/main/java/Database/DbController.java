@@ -13,9 +13,10 @@ public class DbController {
         Connection db = null;
         try {
             Class.forName("org.sqlite.JDBC");
-            db = DriverManager.getConnection("jdbc:sqlite:src/main/resources/BackEndDb.db");
+            db = DriverManager.getConnection("jdbc:sqlite:LinkedInServer/LinkedInServer/src/main/resources/BackEndDb.db");
         } catch (Exception e) {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            e.printStackTrace();
         }
         //System.out.println("Connected to database");
 
