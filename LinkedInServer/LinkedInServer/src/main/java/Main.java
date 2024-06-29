@@ -31,9 +31,9 @@ public class Main {
         createTableProfileEducation();
         createTableProfileContactsInfo();
         createTableCertificate();
-        createTableComments();
-        createTableLikes();
-        createTablePosts();
+        createTableComment();
+        createTableLike();
+        createTablePost();
         createTableConnections();
         createTableProfileSports();
         createTableProfileVoluntaryActivities();
