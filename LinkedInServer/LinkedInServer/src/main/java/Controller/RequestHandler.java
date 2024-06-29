@@ -2,6 +2,8 @@ package Controller;
 
 import Database.DatabaseQueryController;
 import Model.*;
+import Model.Requests.LoginCredentials;
+import Model.Requests.RegisterCredentials;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
