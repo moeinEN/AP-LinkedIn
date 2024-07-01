@@ -7,6 +7,9 @@ import Model.Requests.RegisterCredentials;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -14,6 +17,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Logger;
@@ -222,6 +228,73 @@ public class RequestHandler {
             try (OutputStream os = exchange.getResponseBody()) {
                 os.write(response);
             }
+        }
+    }
+    public static void uploadHandler(HttpExchange exchange) throws IOException, SQLException {
+        if ("POST".equals(exchange.getRequestMethod())) {
+            try {
+                DiskFileItemFactory factory = new DiskFileItemFactory();
+                ServletFileUpload upload = new ServletFileUpload(factory);
+
+                // Parse the request
+                List<FileItem> items = upload.parseRequest(new HttpExchangeRequestContext(exchange));
+                for (FileItem item : items) {
+                    if (!item.isFormField()) {
+                        // Handle file upload
+                        Path uploadDir = Paths.get("src/main/resources/testUpload");
+                        if (!Files.exists(uploadDir)) {
+                            Files.createDirectories(uploadDir);
+                        }
+                        Path filePath = uploadDir.resolve(item.getName());
+                        Files.copy(item.getInputStream(), filePath);
+                    }
+                }
+
+                String response = "File uploaded successfully!";
+                exchange.sendResponseHeaders(200, response.getBytes().length);
+                OutputStream outputStream = exchange.getResponseBody();
+                outputStream.write(response.getBytes());
+                outputStream.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+                exchange.sendResponseHeaders(500, -1);
+            }
+        } else {
+            exchange.sendResponseHeaders(405, -1); // 405 Method Not Allowed
+        }
+    }
+    public static void downloadHandler(HttpExchange exchange) throws IOException, SQLException {
+        if ("GET".equalsIgnoreCase(exchange.getRequestMethod())) {
+            // Extract file name from the request URI
+            String requestedFile = exchange.getRequestURI().getPath().replace("/files/", "");
+            Path filePath = Paths.get("src/main/resources/testUpload", requestedFile);
+
+            if (Files.exists(filePath)) {
+                // Determine the file's content type
+                String contentType = Files.probeContentType(filePath);
+                if (contentType == null) {
+                    contentType = "application/octet-stream";
+                }
+
+                // Set the response headers
+                exchange.getResponseHeaders().set("Content-Type", contentType);
+                exchange.getResponseHeaders().set("Content-Disposition", "attachment; filename=\"" + filePath.getFileName().toString() + "\"");
+                exchange.sendResponseHeaders(200, Files.size(filePath));
+
+                // Write the file content to the response body
+                OutputStream outputStream = exchange.getResponseBody();
+                Files.copy(filePath, outputStream);
+                outputStream.close();
+            } else {
+                // File not found
+                String response = "File not found";
+                exchange.sendResponseHeaders(404, response.getBytes().length);
+                OutputStream outputStream = exchange.getResponseBody();
+                outputStream.write(response.getBytes());
+                outputStream.close();
+            }
+        } else {
+            exchange.sendResponseHeaders(405, -1); // 405 Method Not Allowed
         }
     }
 }

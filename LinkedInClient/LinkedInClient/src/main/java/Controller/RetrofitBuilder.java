@@ -8,12 +8,18 @@ import Service.UserService;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-import okhttp3.OkHttpClient;
-import okhttp3.ResponseBody;
+import okhttp3.*;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+import static Controller.FileController.writeResponseBodyToDisk;
 
 public class RetrofitBuilder {
 
@@ -178,4 +184,57 @@ public class RetrofitBuilder {
         }
     }
 
+    //TODO add size limit to uploaded files
+    //TODO filenames
+    public void asyncCallUpload(String filePath) {
+        File file = new File(filePath);
+        RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+        MultipartBody.Part body = MultipartBody.Part.createFormData("file", file.getName(), requestFile);
+
+
+        UserService service = retrofit.create(UserService.class);
+        Call<ResponseBody> call = service.upload(body);
+        Messages message = null;
+        call.enqueue(new retrofit2.Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    System.out.println("Upload successful: " + response.body());
+                } else {
+                    System.out.println("Upload failed: " + response.message());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable throwable) {
+                throwable.printStackTrace();
+            }
+        });
+    }
+
+    public void asyncCallDownload(String filename) {
+        UserService service = retrofit.create(UserService.class);
+        Call<ResponseBody> call = service.downloadFile(filename);
+
+        call.enqueue(new retrofit2.Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    boolean success = writeResponseBodyToDisk(response.body(), filename);
+                    if (success) {
+                        System.out.println("File downloaded successfully");
+                    } else {
+                        System.out.println("Failed to save the file");
+                    }
+                } else {
+                    System.out.println("Server returned an error: " + response.message());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable throwable) {
+                throwable.printStackTrace();
+            }
+        });
+    }
 }

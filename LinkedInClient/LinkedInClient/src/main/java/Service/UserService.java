@@ -3,6 +3,8 @@ package Service;
 import Model.Requests.*;
 import Model.User;
 import com.google.gson.JsonObject;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.*;
@@ -39,5 +41,12 @@ public interface UserService {
     @POST("/comment")
     Call<ResponseBody> comment(@Body CommentRequest comment, @Header("sessionToken") String sessionToken);
 
+    @Multipart
+    @POST("/upload")
+    Call<ResponseBody> upload(@Part MultipartBody.Part file);
+
+    @Streaming
+    @GET("files/{filename}")
+    Call<ResponseBody> downloadFile(@Path("filename") String filename);
 
 }
