@@ -20,7 +20,7 @@ import org.apache.commons.io.FilenameUtils;
 
 import static Controller.FileController.writeResponseBodyToDisk;
 
-public class RetrofitBuilder {
+public class RetrofitBuilder implements NetworkRequest{
 
     private static final String BASE_URL = "http://localhost:8080";
     private Retrofit retrofit = retrofitBuilder();
