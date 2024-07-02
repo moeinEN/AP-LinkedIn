@@ -46,7 +46,12 @@ public interface UserService {
     Call<ResponseBody> upload(@Part MultipartBody.Part file);
 
     @Streaming
-    @GET("files/{filename}")
+    @GET("/files/{filename}")
     Call<ResponseBody> downloadFile(@Path("filename") String filename);
 
+    @POST("/acceptConnection")
+    Call<ResponseBody> acceptConnection(@Body AcceptConnection acceptConnection, @Header("sessionToken") String sessionToken);
+
+    @POST("/watchProfile")
+    Call<ResponseBody> watchProfile(@Body WatchProfileRequest watchProfile, @Header("sessionToken") String sessionToken);
 }
