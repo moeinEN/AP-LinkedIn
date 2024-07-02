@@ -69,6 +69,39 @@ public class HttpHandler {
             }
         });
 
+        server.createContext("/like", new com.sun.net.httpserver.HttpHandler() {
+            @Override
+            public void handle(HttpExchange exchange) throws IOException {
+                try {
+                    RequestHandler.likeHandler(exchange);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
+        server.createContext("/comment", new com.sun.net.httpserver.HttpHandler() {
+            @Override
+            public void handle(HttpExchange exchange) throws IOException {
+                try {
+                    RequestHandler.commentHandler(exchange);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
+        server.createContext("/connect", new com.sun.net.httpserver.HttpHandler() {
+            @Override
+            public void handle(HttpExchange exchange) throws IOException {
+                try {
+                    RequestHandler.connectRequestHandler(exchange);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
         server.createContext("/user/profile", new com.sun.net.httpserver.HttpHandler() {
             public void handle(HttpExchange exchange) throws IOException {
                 try {
@@ -99,10 +132,75 @@ public class HttpHandler {
             }
         });
 
+        server.createContext("/acceptConnection", new com.sun.net.httpserver.HttpHandler() {
+            public void handle(HttpExchange exchange) throws IOException {
+                try {
+                    RequestHandler.acceptConnectionHandler(exchange);
+                }
+                catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
         server.createContext("/watchProfile", new com.sun.net.httpserver.HttpHandler() {
             public void handle(HttpExchange exchange) throws IOException {
                 try {
                     RequestHandler.watchProfile(exchange);
+                }
+                catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
+        server.createContext("/acceptConnection", new com.sun.net.httpserver.HttpHandler() {
+            public void handle(HttpExchange exchange) throws IOException {
+                try {
+                    RequestHandler.acceptConnectionHandler(exchange);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
+        server.createContext("/searchPost", new com.sun.net.httpserver.HttpHandler() {
+            public void handle(HttpExchange exchange) throws IOException {
+                try {
+                    RequestHandler.searchPost(exchange);
+                }
+                catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
+        server.createContext("/searchProfile", new com.sun.net.httpserver.HttpHandler() {
+            public void handle(HttpExchange exchange) throws IOException {
+                try {
+                    RequestHandler.searchProfile(exchange);
+                }
+                catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
+        server.createContext("/watchConnections", new com.sun.net.httpserver.HttpHandler() {
+            public void handle(HttpExchange exchange) throws IOException {
+                try {
+                    RequestHandler.watchConnections(exchange);
+                }
+                catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
+        server.createContext("/watchPendingConnections", new com.sun.net.httpserver.HttpHandler() {
+            public void handle(HttpExchange exchange) throws IOException {
+                try {
+                    RequestHandler.watchPendingConnections(exchange);
                 }
                 catch (Exception e) {
                     throw new RuntimeException(e);

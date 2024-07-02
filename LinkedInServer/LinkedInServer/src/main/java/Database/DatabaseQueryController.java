@@ -215,7 +215,7 @@ public class DatabaseQueryController {
 
 
     //POST
-    public static void createTableUserWatchList(int userId) throws SQLException {
+    public static void createTableUserWatchList() throws SQLException {
         String sql = "CREATE TABLE UserWatchList (\n" +
                 "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
                 "    specifiedUserId INTEGER,\n" +
@@ -396,7 +396,7 @@ public class DatabaseQueryController {
             throw e;
         }
     }
-    public WatchPostSearchResults getPostBySearch(SearchPostsRequest searchPostsRequest) throws SQLException {
+    public static WatchPostSearchResults getPostBySearch(SearchPostsRequest searchPostsRequest) throws SQLException {
         String sql = "SELECT * FROM POST WHERE caption like ? OR hashtag like ?";
         Connection conn = DbController.getConnection();
         conn.setAutoCommit(false);
@@ -463,13 +463,13 @@ public class DatabaseQueryController {
                 ");";
         createTable(sql);
     }
-    public static void insertPendingConnect(int receiverId, ConnectRequest connectRequest) throws SQLException {
+    public static void insertPendingConnect(int senderId, ConnectRequest connectRequest) throws SQLException {
         String sql = "INSERT INTO Pending (specifiedSenderId, specifiedReceiverId, note) VALUES (?, ?, ?)";
         Connection conn = DbController.getConnection();
         conn.setAutoCommit(false);
         PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
-            int senderId = connectRequest.getIdentificationCode();
+            int receiverId = connectRequest.getIdentificationCode();
             pstmt.setInt(1, senderId);
             pstmt.setInt(2, receiverId);
             pstmt.setString(3, connectRequest.getNote());
@@ -497,9 +497,9 @@ public class DatabaseQueryController {
             throw e;
         }
     }
-    public static WatchConnectionPendingLists selectPendingConnectionList(WatchConnectionListRequest watchConnectionListRequest) throws SQLException {
+    public static WatchConnectionPendingLists selectPendingConnectionList(WatchPendingConnectionListRequest watchPendingConnectionListRequest) throws SQLException {
         String sql = "SELECT * FROM PENDING WHERE specifiedReceiverId = ?";
-        int receiverId = watchConnectionListRequest.getMyProfileId();
+        int receiverId = watchPendingConnectionListRequest.getMyProfileId();
         Connection conn = DbController.getConnection();
         conn.setAutoCommit(false);
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -521,6 +521,31 @@ public class DatabaseQueryController {
         }
         return new WatchConnectionPendingLists();
     }
+    public static WatchConnectionListResponse selectConnectionList(WatchConnectionListRequest watchConnectionListRequest) throws SQLException {
+        String sql = "SELECT * FROM Connect WHERE specifiedReceiverId = ?";
+        int receiverId = watchConnectionListRequest.getMyProfileId();
+        Connection conn = DbController.getConnection();
+        conn.setAutoCommit(false);
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, receiverId);
+            ResultSet rs = pstmt.executeQuery();
+            WatchConnectionListResponse watchConnectionListResponse = new WatchConnectionListResponse();
+            while (rs.next()) {
+                int senderId = rs.getInt("specifiedSenderId");
+                MiniProfile miniProfile = getUserMiniProfile(conn, senderId);
+                if (Objects.nonNull(miniProfile)) {
+                    watchConnectionListResponse.getConnectionList().add(miniProfile);
+                }
+            }
+            conn.commit();
+            return watchConnectionListResponse;
+        } catch (Exception e) {
+            e.printStackTrace();
+            conn.rollback();
+        }
+        return new WatchConnectionListResponse();
+    }
+
     public static void acceptOrDeclineConnection(int receiverId, AcceptConnection acceptConnection) throws SQLException {
         String sql = "DELETE FROM Pending WHERE specifiedSenderId = ? AND specifiedReceiverId = ?";
         Connection conn = DbController.getConnection();
@@ -722,12 +747,7 @@ public class DatabaseQueryController {
                     int profileId = generatedKeys.getInt(1);
 
                     ProfileExperience experience = profile.getProfileExperience();
-                    for (ProfileJob job : experience.getJobs()) {
-                        insertProfileJob(conn, job, profileId);
-                    }
-                    for (ProfileVoluntaryActivities activity : experience.getVoluntaryActivities()) {
-                        insertProfileVoluntaryActivity(conn, activity, profileId);
-                    }
+
                     insertProfileExperience(conn, experience, profileId);
 
                     for (ProfileEducation education : profile.getProfileEducationList()) {
@@ -770,17 +790,19 @@ public class DatabaseQueryController {
             pstmt.setString(11, header.getJobStatus());
             pstmt.executeUpdate();
             try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
-                id = generatedKeys.getInt(1);
+                if (generatedKeys.next()){
+                    id = generatedKeys.getInt(1);
+                    insertProfileJob(conn,header.getCurrentJob(), id);
+                    insertProfileEducation(conn, header.getEducationalInfo(), id);
+                    insertProfileContactInfo(conn, header.getContactInfo(), id);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
         }
-        insertProfileJob(conn,header.getCurrentJob(), id);
-        insertProfileEducation(conn, header.getEducationalInfo(), id);
-        insertProfileContactInfo(conn, header.getContactInfo(), id);
     }
-    public static int insertProfileJob(Connection conn, ProfileJob job, int profileId) throws SQLException {
+    public static void insertProfileJob(Connection conn, ProfileJob job, int profileId) throws SQLException {
         String sql = "INSERT INTO ProfileJob (specifiedProfileId, title, jobStatus, companyName, workplaceLocation, jobWorkplaceStatus, companyActivityStatus, startDate, endDate, currentlyWorking, description, jobSkills, informOthersForTheProfileUpdate, isCurrentJob) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         StringJoiner joiner = new StringJoiner(",");
         for (JobSkills jobSkills: job.getJobSkills()){
@@ -803,16 +825,6 @@ public class DatabaseQueryController {
             pstmt.setBoolean(13, job.getInformOthersForTheProfileUpdate());
             pstmt.setBoolean(14, job.getIsCurrentProfileJob());
             pstmt.executeUpdate();
-            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    if (job.getIsCurrentProfileJob())
-                        return generatedKeys.getInt(1);
-                    else
-                        return -1;
-                } else {
-                    throw new SQLException("Creating profile job failed, no ID obtained.");
-                }
-            }
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
@@ -933,9 +945,17 @@ public class DatabaseQueryController {
             pstmt.executeUpdate();
             try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
-                    generatedKeys.getInt(1);
-                } else {
-                    throw new SQLException("Creating profile experience failed, no ID obtained.");
+                    int profileExperienceId = generatedKeys.getInt(1);
+                    for (ProfileJob job : experience.getJobs()) {
+                        insertProfileJob(conn, job, profileId);
+                    }
+                    for (ProfileVoluntaryActivities activity : experience.getVoluntaryActivities()) {
+                        insertProfileVoluntaryActivity(conn, activity, profileExperienceId);
+                    }
+
+                    for (ProfileSports profileSports : experience.getProfileSports()) {
+                        insertProfileSports(conn, profileSports, profileExperienceId);
+                    }
                 }
             }
         } catch (Exception e) {
@@ -993,7 +1013,19 @@ public class DatabaseQueryController {
             throw e;
         }
     }
-
+    public static void insertProfileSports(Connection conn, ProfileSports sports, int experienceId) throws SQLException {
+        String sql = "INSERT INTO ProfileSports (specifiedProfileExperienceId, desc, date) VALUES (?, ?, ?)";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            //conn.setAutoCommit(true);
+            pstmt.setInt(1, experienceId);
+            pstmt.setString(2, sports.getDesc());
+            pstmt.setString(3, sports.getDate().toString());
+            pstmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
     //SELECT PROFILE
     public static MiniProfile getUserMiniProfile(Connection conn, int profileId) throws SQLException {
         String sql = "SELECT * FROM ProfileHeader WHERE specifiedProfileId = ?";

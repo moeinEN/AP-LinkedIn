@@ -1,10 +1,9 @@
 package Service;
 
 import Model.Requests.*;
+import Model.Response.WatchConnectionPendingLists;
 import Model.User;
-import com.google.gson.JsonObject;
 import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.*;
@@ -49,9 +48,24 @@ public interface UserService {
     @GET("/files/{filename}")
     Call<ResponseBody> downloadFile(@Path("filename") String filename);
 
+    @POST("/connect")
+    Call<ResponseBody> connect(@Body ConnectRequest connectRequest, @Header("sessionToken") String sessionToken);
+
     @POST("/acceptConnection")
     Call<ResponseBody> acceptConnection(@Body AcceptConnection acceptConnection, @Header("sessionToken") String sessionToken);
 
     @POST("/watchProfile")
     Call<ResponseBody> watchProfile(@Body WatchProfileRequest watchProfile, @Header("sessionToken") String sessionToken);
+
+    @POST("/searchPost")
+    Call<ResponseBody> searchPost(@Body SearchPostsRequest searchPostsRequest, @Header("sessionToken") String sessionToken);
+
+    @POST("/searchProfile")
+    Call<ResponseBody> searchProfile(@Body SearchProfileRequest searchProfileRequest, @Header("sessionToken") String sessionToken);
+
+    @POST("/watchConnections")
+    Call<ResponseBody> watchConnections(@Body WatchConnectionListRequest watchConnectionListRequest, @Header("sessionToken") String sessionToken);
+
+    @POST("/watchPendingConnections")
+    Call<ResponseBody> watchPendingConnections(@Body WatchPendingConnectionListRequest watchPendingConnectionListRequest, @Header("sessionToken") String sessionToken);
 }
