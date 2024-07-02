@@ -18,7 +18,7 @@ public interface UserService {
 
     //test endpoint
     @GET("/hello")
-    public Call<JsonObject> sayHello();
+    public Call<ResponseBody> sayHello();
 
     @GET("/users")
     public Call<List<User>> getUsers();

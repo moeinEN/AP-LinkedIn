@@ -22,7 +22,7 @@ import java.io.InputStream;
 
 import static Controller.FileController.writeResponseBodyToDisk;
 
-public class RetrofitBuilder {
+public class RetrofitBuilder implements NetworkRequest{
 
     private static final String BASE_URL = "http://localhost:8080";
     private Retrofit retrofit = retrofitBuilder();
@@ -65,18 +65,21 @@ public class RetrofitBuilder {
             return null; }
     }
 
-    public JsonObject syncCallSayHello(){
+    public String syncCallSayHello(){
         UserService service = retrofit.create(UserService.class);
-        Call<JsonObject> callSync = service.sayHello();
-
+        Call<ResponseBody> callSync = service.sayHello();
+        String serverResponse;
         try {
-            Response<JsonObject> response = callSync.execute();
-            JsonObject string = response.body();
-            return string;
+            Response<ResponseBody> response = callSync.execute();
+            byte[] responseBodyBytes = response.body().bytes();
+            Gson gson = new Gson();
+            serverResponse = gson.fromJson(new String(responseBodyBytes), String.class);
+            return serverResponse;
         } catch (Exception ex) {
             ex.printStackTrace();
             return null; }
     }
+
 
 //    public JsonObject syncCallRegister(String username, String password){
 //        Retrofit retrofit = this.retrofitBuilder();
