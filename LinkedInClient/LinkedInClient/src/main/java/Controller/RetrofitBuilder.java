@@ -84,7 +84,8 @@ public class RetrofitBuilder implements NetworkRequest{
             return string;
         } catch (Exception ex) {
             ex.printStackTrace();
-            return null; }
+            return null;
+        }
     }
 
     public Messages syncCallSignUp(RegisterCredentials registerCredentials) {
