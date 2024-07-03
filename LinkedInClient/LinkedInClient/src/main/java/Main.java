@@ -5,14 +5,15 @@ import Model.Requests.*;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class Main {
     public static void main(String[] args) throws ParseException {
-        RetrofitBuilder retrofitBuilder = new RetrofitBuilder();
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("please enter server IP address:");
+        String connectionIPString = scanner.next();
+        String connectionUrl = "http://" + connectionIPString + ":8080";
+        RetrofitBuilder retrofitBuilder = new RetrofitBuilder(connectionUrl);
 
         System.out.println(retrofitBuilder.syncCallSayHello().toString());
 //        System.out.println(retrofitBuilder.syncCallGetUser().toString());
