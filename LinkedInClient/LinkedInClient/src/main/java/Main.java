@@ -5,14 +5,15 @@ import Model.Requests.*;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class Main {
     public static void main(String[] args) throws ParseException {
-        RetrofitBuilder retrofitBuilder = new RetrofitBuilder();
+        System.out.println("please enter the server IP address:");
+        Scanner scanner = new Scanner(System.in);
+        String connectionIPString = scanner.next();
+        String connectionUrlString = "http://" + connectionIPString + ":8080";
+        RetrofitBuilder retrofitBuilder = new RetrofitBuilder(connectionUrlString);
 
 //        System.out.println(retrofitBuilder.syncCallSayHello().toString());
 //        System.out.println(retrofitBuilder.syncCallGetUser().toString());
@@ -37,16 +38,16 @@ public class Main {
 //        }
 
 
-//        LoginCredentials loginCredentials = new LoginCredentials("Goostavo", "tEST@123");
-//        Messages loginResp = retrofitBuilder.syncCallLogin(loginCredentials);
-//        System.out.println(loginResp.getMessage());
-//        System.out.println(Cookies.getSessionToken());
-
-
-        LoginCredentials loginCredentials = new LoginCredentials("testProject", "teteEST@123");
+        LoginCredentials loginCredentials = new LoginCredentials("Goostavo", "tEST@123");
         Messages loginResp = retrofitBuilder.syncCallLogin(loginCredentials);
         System.out.println(loginResp.getMessage());
         System.out.println(Cookies.getSessionToken());
+
+
+//        LoginCredentials loginCredentials = new LoginCredentials("testProject", "teteEST@123");
+//        Messages loginResp = retrofitBuilder.syncCallLogin(loginCredentials);
+//        System.out.println(loginResp.getMessage());
+//        System.out.println(Cookies.getSessionToken());
 
 //        ProfileExperience profileExperience;//###################################
 //        List<ProfileJob> jobs = new ArrayList<>();
@@ -125,7 +126,7 @@ public class Main {
 //        retrofitBuilder.asyncCallUpload("src/main/resources/test2.mp4");
 //        retrofitBuilder.asyncCallDownload("test2.mp4");
 
-        SearchProfileRequest searchProfileRequest = new SearchProfileRequest("Moein",null,"Tehran",null,null,null,null);
+//        SearchProfileRequest searchProfileRequest = new SearchProfileRequest("Moein",null,"Tehran",null,null,null,null);
 
         //ConnectRequest connectRequest = new ConnectRequest(1,);
 

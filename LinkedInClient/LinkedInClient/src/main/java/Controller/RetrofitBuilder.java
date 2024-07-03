@@ -23,14 +23,16 @@ import static Controller.FileController.writeResponseBodyToDisk;
 
 public class RetrofitBuilder implements NetworkRequest{
     private static String BASE_URL;
-    private Retrofit retrofit = retrofitBuilder();
+    private Retrofit retrofit;
+
+    public RetrofitBuilder(String urlOrIP) {
+        BASE_URL = urlOrIP;
+        retrofit = retrofitBuilder();
+    }
 
     private Retrofit retrofitBuilder() {
 
-        System.out.println("please enter the server IP address:");
-        Scanner scanner = new Scanner(System.in);
-        String connectionIPString = scanner.next();
-        BASE_URL = "http://" + connectionIPString + ":8080";
+
 
         OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
 
