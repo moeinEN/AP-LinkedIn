@@ -34,13 +34,14 @@ public class RequestHandler {
     public static void helloHandler(HttpExchange exchange) throws IOException {
         if ("GET".equals(exchange.getRequestMethod())) {
             System.out.println("got it");
-            String response;
+            JSONObject json = new JSONObject();
             try {
-                response = "Hello, received your GET request!";
-            } catch (Exception e) {
+                json.put("Message","Hello, received your GET request!");
+            } catch (JSONException e) {
                 throw new RuntimeException(e);
             }
-            byte[] responseBytes = response.getBytes("UTF-8");
+            String jsonResponse = json.toString();
+            byte[] responseBytes = jsonResponse.getBytes("UTF-8");
             exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
             exchange.sendResponseHeaders(200, responseBytes.length); // use the actual length of the response body
             try (OutputStream os = exchange.getResponseBody()) {

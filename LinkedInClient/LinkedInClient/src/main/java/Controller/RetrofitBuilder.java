@@ -8,6 +8,7 @@ import Model.User;
 import Service.UserService;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import okhttp3.*;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -23,6 +24,7 @@ import static Controller.FileController.writeResponseBodyToDisk;
 
 public class RetrofitBuilder implements NetworkRequest{
     private static String BASE_URL;
+
     private Retrofit retrofit = retrofitBuilder();
 
     private Retrofit retrofitBuilder() {
@@ -72,20 +74,17 @@ public class RetrofitBuilder implements NetworkRequest{
         }
     }
 
-    public String syncCallSayHello() {
+    public JsonObject syncCallSayHello(){
         UserService service = retrofit.create(UserService.class);
-        Call<ResponseBody> callSync = service.sayHello();
-        String serverResponse;
+        Call<JsonObject> callSync = service.sayHello();
+
         try {
-            Response<ResponseBody> response = callSync.execute();
-            byte[] responseBodyBytes = response.body().bytes();
-            Gson gson = new Gson();
-            serverResponse = gson.fromJson(new String(responseBodyBytes), String.class);
-            return serverResponse;
+            Response<JsonObject> response = callSync.execute();
+            JsonObject string = response.body();
+            return string;
         } catch (Exception ex) {
             ex.printStackTrace();
-            return null;
-        }
+            return null; }
     }
 
     public Messages syncCallSignUp(RegisterCredentials registerCredentials) {

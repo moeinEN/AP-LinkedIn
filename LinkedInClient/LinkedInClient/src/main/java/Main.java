@@ -14,7 +14,7 @@ public class Main {
     public static void main(String[] args) throws ParseException {
         RetrofitBuilder retrofitBuilder = new RetrofitBuilder();
 
-//        System.out.println(retrofitBuilder.syncCallSayHello().toString());
+        System.out.println(retrofitBuilder.syncCallSayHello().toString());
 //        System.out.println(retrofitBuilder.syncCallGetUser().toString());
 //
 //        Messages signUpMessages = null;
@@ -37,16 +37,18 @@ public class Main {
 //        }
 
 
-//        LoginCredentials loginCredentials = new LoginCredentials("Goostavo", "tEST@123");
+        LoginCredentials loginCredentials = new LoginCredentials("Goostavo", "tEST@123");
+        Messages loginResp = retrofitBuilder.syncCallLogin(loginCredentials);
+        System.out.println(loginResp.getMessage());
+        System.out.println(Cookies.getSessionToken());
+
+//
+//        LoginCredentials loginCredentials = new LoginCredentials("testProject", "teteEST@123");
 //        Messages loginResp = retrofitBuilder.syncCallLogin(loginCredentials);
 //        System.out.println(loginResp.getMessage());
 //        System.out.println(Cookies.getSessionToken());
 
-
-        LoginCredentials loginCredentials = new LoginCredentials("testProject", "teteEST@123");
-        Messages loginResp = retrofitBuilder.syncCallLogin(loginCredentials);
-        System.out.println(loginResp.getMessage());
-        System.out.println(Cookies.getSessionToken());
+//        System.out.println(retrofitBuilder.syncCallSayHello());
 
 //        ProfileExperience profileExperience;//###################################
 //        List<ProfileJob> jobs = new ArrayList<>();
@@ -125,7 +127,7 @@ public class Main {
 //        retrofitBuilder.asyncCallUpload("src/main/resources/test2.mp4");
 //        retrofitBuilder.asyncCallDownload("test2.mp4");
 
-        SearchProfileRequest searchProfileRequest = new SearchProfileRequest("Moein",null,"Tehran",null,null,null,null);
+//        SearchProfileRequest searchProfileRequest = new SearchProfileRequest("Moein",null,"Tehran",null,null,null,null);
 
         //ConnectRequest connectRequest = new ConnectRequest(1,);
 

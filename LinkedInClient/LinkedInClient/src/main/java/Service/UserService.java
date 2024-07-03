@@ -3,6 +3,7 @@ package Service;
 import Model.Requests.*;
 import Model.Response.WatchConnectionPendingLists;
 import Model.User;
+import com.google.gson.JsonObject;
 import okhttp3.MultipartBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -17,7 +18,7 @@ public interface UserService {
 
     //test endpoint
     @GET("/hello")
-    public Call<ResponseBody> sayHello();
+    public Call<JsonObject> sayHello();
 
     @GET("/users")
     public Call<List<User>> getUsers();
