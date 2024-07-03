@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.Scanner;
 
 import static Database.DatabaseQueryController.*;
 
@@ -50,11 +51,10 @@ public class Main {
         createTableProfileHeader();
         createTableCertificate();
 
-
-
-
-
-        HttpServer httpServer = HttpHandler.makeConnectionPoint("localhost", 8080);
+        System.out.println("please enter the IP you want the server to run on:");
+        Scanner scanner = new Scanner(System.in);
+        String connectionIPString = scanner.next();
+        HttpServer httpServer = HttpHandler.makeConnectionPoint(connectionIPString, 8080);
         HttpHandler.createContext(httpServer);
 
 //        SearchProfileRequest searchProfileRequest = new SearchProfileRequest();
