@@ -120,7 +120,7 @@ public class DatabaseQueryController {
             Connection db = null;
             Statement stmt = null;
             db = DbController.getConnection();
-            db.setAutoCommit(true);
+            db.setAutoCommit(false);
             stmt = db.createStatement();
 
             String usernameCheckSql = String.format("SELECT * FROM USER WHERE username = '%s'", username);
@@ -139,9 +139,11 @@ public class DatabaseQueryController {
 
             try {
                 stmt.executeUpdate(sql);
+                db.commit();
                 return Messages.SUCCESS;
             } catch ( Exception e ) {
                 e.printStackTrace();
+                db.rollback();
                 return Messages.INTERNAL_ERROR;
             } finally {
                 stmt.close();
@@ -258,6 +260,7 @@ public class DatabaseQueryController {
                 "    specifiedUserId INTEGER,\n" +
                 "    caption TEXT,\n" +
                 "    hashtag TEXT,\n" +
+                "    mediaName TEXT,\n" +
                 "    FOREIGN KEY (specifiedUserId) REFERENCES USER(id)\n" +
                 ");";
         createTable(sql);
@@ -283,11 +286,12 @@ public class DatabaseQueryController {
                 ");";
         createTable(sql);
     }
-    public static void insertPost(Post post, int userId) throws SQLException {
-        String sql = "INSERT INTO POST (specifiedUserId, caption, hashtag) VALUES (?, ?, ?)";
+    public static int insertPost(Post post, int userId) throws SQLException {
+        String sql = "INSERT INTO POST (specifiedUserId, caption, hashtag, mediaName) VALUES (?, ?, ?, ?)";
         Connection conn = DbController.getConnection();
         conn.setAutoCommit(false);
-        PreparedStatement pstmt = conn.prepareStatement(sql);
+        PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        int generatedId = -1;
         try {
             pstmt.setInt(1, userId);
             pstmt.setString(2, post.getText());
@@ -296,12 +300,28 @@ public class DatabaseQueryController {
                 joiner.add(str);
             }
             pstmt.setString(3, joiner.toString());
+            pstmt.setString(4, post.getMediaName());
             pstmt.executeUpdate();
+
+            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    generatedId = generatedKeys.getInt(1);
+                } else {
+                    throw new SQLException("Creating post failed, no ID obtained.");
+                }
+            }
+
             conn.commit();
         } catch (Exception e) {
             e.printStackTrace();
+            conn.rollback();
             throw e;
+        } finally {
+            conn.setAutoCommit(true);
+            pstmt.close();
+            conn.close();
         }
+        return generatedId;
     }
     public static void insertComment(CommentRequest comment, int userId) throws SQLException {
         String sql = "INSERT INTO COMMENT (specifiedUserId, specifiedPostId, comment) VALUES (?, ?, ?)";
@@ -362,7 +382,8 @@ public class DatabaseQueryController {
             Like like = new Like();
             while (rs.next()) {
                 int userId = rs.getInt("specifiedUserId");
-                MiniProfile miniProfile = getUserMiniProfile(conn, userId);
+                int profileId = getProfileIdFromUserId(conn, userId);
+                MiniProfile miniProfile = getUserMiniProfile(conn, profileId);
                 like.getLikedUsers().add(miniProfile);
             }
             return like;
@@ -381,13 +402,15 @@ public class DatabaseQueryController {
                 int userId = rs.getInt("specifiedUserId");
                 int commentId = rs.getInt("id");
                 String commentText = rs.getString("comment");
-                MiniProfile miniProfile = getUserMiniProfile(conn, userId);
-                if (comment.getCommentedUsers().containsKey(miniProfile)){
-                    comment.getCommentedUsers().get(miniProfile).put(commentId, commentText);
+                int profileId = getProfileIdFromUserId(conn, userId);
+                MiniProfile miniProfile = getUserMiniProfile(conn, profileId);
+                if (comment.getCommentedUsers().containsKey(profileId)){
+                    comment.getCommentedUsers().get(profileId).getComments().put(commentId, commentText);
                 } else {
-                    HashMap<Integer, String> temp = new HashMap<>();
-                    temp.put(commentId, commentText);
-                    comment.getCommentedUsers().put(miniProfile, temp);
+                    CommentIndividual commentIndividual = new CommentIndividual();
+                    commentIndividual.getComments().put(commentId, commentText);
+                    commentIndividual.setMiniProfile(miniProfile);
+                    comment.getCommentedUsers().put(profileId, commentIndividual);
                 }
             }
             return comment;
@@ -414,12 +437,14 @@ public class DatabaseQueryController {
                 List<String> hashtagList = new ArrayList<>(Arrays.asList(hashtags));
                 Like like = getLikes(conn, postId);
                 Comment comment = getComments(conn, postId);
+                String mediaName = rs.getString("mediaName");
                 Post post = new Post();
                 post.setComments(comment);
                 post.setText(caption);
                 post.setLikes(like);
                 post.setIdentification(postId);
                 post.setHashtags(hashtagList);
+                post.setMediaName(mediaName);
                 watchPostSearchResults.getPosts().add(post);
             }
             conn.commit();
@@ -430,7 +455,6 @@ public class DatabaseQueryController {
         }
         return new WatchPostSearchResults();
     }
-
     //CONNECTION
     public static void createTableConnect() throws SQLException {
         String sql = "CREATE TABLE Connect (\n" +
@@ -469,7 +493,7 @@ public class DatabaseQueryController {
         conn.setAutoCommit(false);
         PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
-            int receiverId = connectRequest.getIdentificationCode();
+            int receiverId = getUserIdFromProfileId(conn, connectRequest.getIdentificationCode());
             pstmt.setInt(1, senderId);
             pstmt.setInt(2, receiverId);
             pstmt.setString(3, connectRequest.getNote());
@@ -478,7 +502,40 @@ public class DatabaseQueryController {
         }
         catch (Exception e) {
             e.printStackTrace();
+            conn.rollback();
             throw e;
+        }
+    }
+    public static List<Integer> getConnectionList(int receiverId) throws SQLException {
+        String sql1 = "SELECT * FROM Connect WHERE specifiedReceiverId = ?";
+        String sql2 = "SELECT * FROM Connect WHERE specifiedSenderId = ?";
+        Connection conn = DbController.getConnection();
+        conn.setAutoCommit(false);
+        List<Integer> connectionList = new ArrayList<>();
+        try (PreparedStatement pstmt1 = conn.prepareStatement(sql1);
+             PreparedStatement pstmt2 = conn.prepareStatement(sql2)) {
+
+            pstmt1.setInt(1, receiverId);
+            ResultSet rs1 = pstmt1.executeQuery();
+            while (rs1.next()) {
+                int senderId = rs1.getInt("specifiedSenderId");
+                connectionList.add(senderId);
+            }
+
+            pstmt2.setInt(1, receiverId);
+            ResultSet rs2 = pstmt2.executeQuery();
+            while (rs2.next()) {
+                int receiverId1 = rs2.getInt("specifiedReceiverId");
+                connectionList.add(receiverId1);
+            }
+            conn.commit();
+            return connectionList;
+        } catch (Exception e) {
+            e.printStackTrace();
+            conn.rollback();
+            return new ArrayList<>();
+        } finally {
+            conn.setAutoCommit(true);
         }
     }
     public static void insertConnect(int senderId, int receiverId) throws SQLException {
@@ -497,9 +554,8 @@ public class DatabaseQueryController {
             throw e;
         }
     }
-    public static WatchConnectionPendingLists selectPendingConnectionList(WatchPendingConnectionListRequest watchPendingConnectionListRequest) throws SQLException {
-        String sql = "SELECT * FROM PENDING WHERE specifiedReceiverId = ?";
-        int receiverId = watchPendingConnectionListRequest.getMyProfileId();
+    public static WatchConnectionPendingLists selectPendingConnectionList(int receiverId) throws SQLException {
+        String sql = "SELECT * FROM Pending WHERE specifiedReceiverId = ?";
         Connection conn = DbController.getConnection();
         conn.setAutoCommit(false);
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -508,9 +564,12 @@ public class DatabaseQueryController {
             WatchConnectionPendingLists watchConnectionPendingLists = new WatchConnectionPendingLists();
             while (rs.next()) {
                 int senderId = rs.getInt("specifiedSenderId");
-                MiniProfile miniProfile = getUserMiniProfile(conn, senderId);
+                int profileId = getProfileIdFromUserId(conn, senderId);
+                String note = rs.getString("note");
+                MiniProfile miniProfile = getUserMiniProfile(conn, profileId);
                 if (Objects.nonNull(miniProfile)) {
-                    watchConnectionPendingLists.getPendingLists().put(miniProfile, miniProfile.getFirstName() + " " + miniProfile.getLastName());
+                    ConnectionPendingObject connectionPendingObject = new ConnectionPendingObject(miniProfile, note);
+                    watchConnectionPendingLists.getPendingLists().put(profileId, connectionPendingObject);
                 }
             }
             conn.commit();
@@ -521,29 +580,46 @@ public class DatabaseQueryController {
         }
         return new WatchConnectionPendingLists();
     }
-    public static WatchConnectionListResponse selectConnectionList(WatchConnectionListRequest watchConnectionListRequest) throws SQLException {
-        String sql = "SELECT * FROM Connect WHERE specifiedReceiverId = ?";
-        int receiverId = watchConnectionListRequest.getMyProfileId();
+    public static WatchConnectionListResponse selectConnectionList(int receiverId) throws SQLException {
+        String sql1 = "SELECT * FROM Connect WHERE specifiedReceiverId = ?";
+        String sql2 = "SELECT * FROM Connect WHERE specifiedSenderId = ?";
         Connection conn = DbController.getConnection();
         conn.setAutoCommit(false);
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, receiverId);
-            ResultSet rs = pstmt.executeQuery();
-            WatchConnectionListResponse watchConnectionListResponse = new WatchConnectionListResponse();
-            while (rs.next()) {
-                int senderId = rs.getInt("specifiedSenderId");
-                MiniProfile miniProfile = getUserMiniProfile(conn, senderId);
+        WatchConnectionListResponse watchConnectionListResponse = new WatchConnectionListResponse();
+        try (PreparedStatement pstmt1 = conn.prepareStatement(sql1);
+             PreparedStatement pstmt2 = conn.prepareStatement(sql2)) {
+
+            pstmt1.setInt(1, receiverId);
+            ResultSet rs1 = pstmt1.executeQuery();
+            while (rs1.next()) {
+                int senderId = rs1.getInt("specifiedSenderId");
+                int senderProfileId = getProfileIdFromUserId(conn, senderId);
+                MiniProfile miniProfile = getUserMiniProfile(conn, senderProfileId);
                 if (Objects.nonNull(miniProfile)) {
                     watchConnectionListResponse.getConnectionList().add(miniProfile);
                 }
             }
+
+            pstmt2.setInt(1, receiverId);
+            ResultSet rs2 = pstmt2.executeQuery();
+            while (rs2.next()) {
+                int senderId = rs2.getInt("specifiedReceiverId");
+                int senderProfileId = getProfileIdFromUserId(conn, senderId);
+                MiniProfile miniProfile = getUserMiniProfile(conn, senderProfileId);
+                if (Objects.nonNull(miniProfile)) {
+                    watchConnectionListResponse.getConnectionList().add(miniProfile);
+                }
+            }
+
             conn.commit();
             return watchConnectionListResponse;
         } catch (Exception e) {
             e.printStackTrace();
             conn.rollback();
+            return new WatchConnectionListResponse();
+        } finally {
+            conn.setAutoCommit(true);
         }
-        return new WatchConnectionListResponse();
     }
 
     public static void acceptOrDeclineConnection(int receiverId, AcceptConnection acceptConnection) throws SQLException {
@@ -558,9 +634,11 @@ public class DatabaseQueryController {
             if (acceptConnection.getAcceptOrDecline()){
                 addConnectionToUser(conn, senderId, receiverId);
             }
+            conn.commit();
         } catch (Exception e) {
             e.printStackTrace();
             conn.rollback();
+            throw e;
         }
     }
     public static void addConnectionToUser(Connection conn, int senderId, int receiverId) throws SQLException {
@@ -1072,13 +1150,16 @@ public class DatabaseQueryController {
 
     public static WatchProfileResponse getWatchProfileRequest(WatchProfileRequest watchProfileRequest) throws SQLException {
         Connection conn = DbController.getConnection();
+        conn.setAutoCommit(false);
         ProfileExperience profileExperience = getProfileExperience(conn, watchProfileRequest.getProfileId());
         List<ProfileEducation> profileEducations = getProfileEducation(conn, watchProfileRequest.getProfileId(), false);
         List<Certificate> certificates = getCertificate(conn, watchProfileRequest.getProfileId());
         ProfileHeader profileHeader = getProfileHeader(conn, watchProfileRequest.getProfileId());
         ProfileSkills profileSkills = getProfileSkills(conn, watchProfileRequest.getProfileId());
         ProfileOrganizations profileOrganizations = getProfileOrganization(conn, watchProfileRequest.getProfileId());
-        WatchProfileResponse profileToWatch = new WatchProfileResponse(profileExperience, profileEducations, certificates, profileHeader, profileSkills, profileOrganizations, watchProfileRequest.getProfileId(), null);
+        int userId = getUserIdFromProfileId(conn, watchProfileRequest.getProfileId());
+        Feed feed = getFeed(userId);
+        WatchProfileResponse profileToWatch = new WatchProfileResponse(profileExperience, profileEducations, certificates, profileHeader, profileSkills, profileOrganizations, watchProfileRequest.getProfileId(), feed);
         conn.close();
         return profileToWatch;
     }
@@ -1332,4 +1413,70 @@ public class DatabaseQueryController {
         }
         return null;
     }
+
+    public static int getUserIdFromProfileId(Connection conn, int profileId) throws SQLException {
+        String sql = "SELECT * FROM Profile WHERE id = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, profileId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("userId");
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+        return 0;
+    }
+
+    public static int getProfileIdFromUserId(Connection conn, int userId) throws SQLException {
+        String sql = "SELECT * FROM Profile WHERE userId = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, userId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("id");
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+        return 0;
+    }
+
+    public static Feed getFeed(int userId) throws SQLException {
+        String sql = "SELECT * FROM POST WHERE userId = ?";
+        Connection conn = DbController.getConnection();
+        conn.setAutoCommit(false);
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, userId);
+            ResultSet rs = pstmt.executeQuery();
+            Feed feed = new Feed();
+            while (rs.next()) {
+                Post post = new Post();
+                int postId = rs.getInt("id");
+                String caption = rs.getString("caption");
+                String[] hashtags = rs.getString("hashtag").split(",");
+                List<String> hashtagList = new ArrayList<>(Arrays.asList(hashtags));
+                Like like = getLikes(conn, postId);
+                Comment comment = getComments(conn, postId);
+                post.setComments(comment);
+                post.setText(caption);
+                post.setLikes(like);
+                post.setIdentification(postId);
+                post.setHashtags(hashtagList);
+                feed.getPosts().add(post);
+            }
+            conn.commit();
+            return feed;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            conn.rollback();
+            throw e;
+        }
+    }
+
 }

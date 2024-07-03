@@ -484,7 +484,7 @@ public class RequestHandler {
         }
     }
     public static void watchProfile(HttpExchange exchange) throws IOException, SQLException {
-        if("GET".equalsIgnoreCase(exchange.getRequestMethod())) { // make other method equals check to equalsIgonreCase
+        if("POST".equalsIgnoreCase(exchange.getRequestMethod())) { // make other method equals check to equalsIgonreCase
             byte[] response;
             int responseCode;
 
@@ -527,7 +527,7 @@ public class RequestHandler {
         }
     }
     public static void searchPost(HttpExchange exchange) throws IOException, SQLException {
-        if("GET".equalsIgnoreCase(exchange.getRequestMethod())) { // make other method equals check to equalsIgonreCase
+        if("POST".equalsIgnoreCase(exchange.getRequestMethod())) { // make other method equals check to equalsIgonreCase
             byte[] response;
             int responseCode;
 
@@ -570,7 +570,7 @@ public class RequestHandler {
         }
     }
     public static void searchProfile(HttpExchange exchange) throws IOException, SQLException {
-        if("GET".equalsIgnoreCase(exchange.getRequestMethod())) { // make other method equals check to equalsIgonreCase
+        if("POST".equalsIgnoreCase(exchange.getRequestMethod())) { // make other method equals check to equalsIgonreCase
             byte[] response;
             int responseCode;
 
@@ -627,11 +627,9 @@ public class RequestHandler {
                 try (InputStream requestBody = exchange.getRequestBody();
                      InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
                     Gson gson = new Gson();
-                    WatchConnectionListRequest watchConnectionListRequest = null;
                     try {
-                        watchConnectionListRequest = gson.fromJson(reader, WatchConnectionListRequest.class);
                         try {
-                            response = DatabaseQueryController.selectConnectionList(watchConnectionListRequest).toByte("UTF-8");
+                            response = DatabaseQueryController.selectConnectionList(userId).toByte("UTF-8");
                             responseCode = SUCCESS.getStatusCode();
                         } catch (Exception exception) {
                             exception.printStackTrace();
@@ -670,11 +668,11 @@ public class RequestHandler {
                 try (InputStream requestBody = exchange.getRequestBody();
                      InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
                     Gson gson = new Gson();
-                    WatchPendingConnectionListRequest watchPendingConnectionListRequest = null;
+                    //WatchPendingConnectionListRequest watchPendingConnectionListRequest = null;
                     try {
-                        watchPendingConnectionListRequest = gson.fromJson(reader, WatchPendingConnectionListRequest.class);
+                        //watchPendingConnectionListRequest = gson.fromJson(reader, WatchPendingConnectionListRequest.class);
                         try {
-                            response = DatabaseQueryController.selectPendingConnectionList(watchPendingConnectionListRequest).toByte("UTF-8");
+                            response = DatabaseQueryController.selectPendingConnectionList(userId).toByte("UTF-8");
                             responseCode = SUCCESS.getStatusCode();
                         } catch (Exception exception) {
                             exception.printStackTrace();
@@ -697,5 +695,63 @@ public class RequestHandler {
             exchange.sendResponseHeaders(405, -1); // 405 method not-allowed
             return;
         }
+    }
+    public static void newPost(HttpExchange exchange) throws IOException, SQLException {
+        if("POST".equalsIgnoreCase(exchange.getRequestMethod())) { // make other method equals check to equalsIgonreCase
+            byte[] response;
+            int responseCode;
+            int postId = -1;
+
+            Headers requestHeaders = exchange.getRequestHeaders();
+            int userId = JwtHandler.validateSessionToken(requestHeaders);
+            if(userId == -1) {
+                response = UNAUTHORIZED.toByte("UTF-8");
+                responseCode = UNAUTHORIZED.getStatusCode();
+            }
+            else {
+                try (InputStream requestBody = exchange.getRequestBody();
+                     InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
+                    Gson gson = new Gson();
+                    Post post = null;
+                    try {
+                        post = gson.fromJson(reader, Post.class);
+                        try {
+                            postId = DatabaseQueryController.insertPost(post, userId);
+                            response = SUCCESS.toByte("UTF-8");
+                            responseCode = SUCCESS.getStatusCode();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
+                            response = INTERNAL_ERROR.toByte("UTF-8");
+                            responseCode = INTERNAL_ERROR.getStatusCode();
+                        }
+                    }
+                    catch (IllegalArgumentException e) {
+                        logger.info(e.getMessage());
+                        response = BAD_REQUEST.toByte("UTF-8");
+                        responseCode = BAD_REQUEST.getStatusCode();
+                    }
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                    response = BAD_REQUEST.toByte("UTF-8");
+                    responseCode = BAD_REQUEST.getStatusCode();
+                }
+            }
+            exchange.sendResponseHeaders(responseCode, response.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(response);
+            }
+            if (postId != -1) {
+                List<Integer> connections = DatabaseQueryController.getConnectionList(userId);
+                for (Integer connectionId : connections) {
+                    DatabaseQueryController.addToWatchList(connectionId, postId);
+                }
+            }
+        } else {
+            byte[] response = METHOD_NOT_ALLOWED.toByte("UTF-8");
+            exchange.sendResponseHeaders(METHOD_NOT_ALLOWED.getStatusCode(), response.length); // 405 Method Not Allowed
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(response);
+            }        }
     }
 }

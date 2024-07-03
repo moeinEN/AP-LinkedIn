@@ -2,6 +2,7 @@ import Controller.RetrofitBuilder;
 import Controller.SignUpController;
 import Model.*;
 import Model.Requests.*;
+import Model.Response.WatchPostSearchResults;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -15,7 +16,7 @@ public class Main {
         String connectionUrl = "http://" + connectionIPString + ":8080";
         RetrofitBuilder retrofitBuilder = new RetrofitBuilder(connectionUrl);
 
-        System.out.println(retrofitBuilder.syncCallSayHello().toString());
+        System.out.println(retrofitBuilder.syncCallSayHello().get(""));
 //        System.out.println(retrofitBuilder.syncCallGetUser().toString());
 //
 //        Messages signUpMessages = null;
@@ -50,17 +51,17 @@ public class Main {
 //        System.out.println(Cookies.getSessionToken());
 
 //        System.out.println(retrofitBuilder.syncCallSayHello());
-
+//
 //        ProfileExperience profileExperience;//###################################
 //        List<ProfileJob> jobs = new ArrayList<>();
-//        ProfileJob profileJob = new ProfileJob("Specialist", JobStatus.FULL_TIME, "Behsa",
+//        ProfileJob profileJob = new ProfileJob("Noob", JobStatus.FULL_TIME, "Behsa",
 //                "Tehran", JobWorkplaceStatus.ON_SITE, true,
 //                new SimpleDateFormat("yyyy-MM").parse("2023-11"),
 //                new SimpleDateFormat("yyyy-MM").parse("2024-12"),
 //                false, "Salooom", Arrays.asList(JobSkills.ARCHITECTURE, JobSkills.CAD, JobSkills.CHANGE_MANAGEMENT),
-//                false, true);
+//                false, false);
 //        jobs.add(profileJob);
-//        ProfileJob profileJob2 = new ProfileJob("Android Developer", JobStatus.INTERNSHIP, "MCI",
+//        ProfileJob profileJob2 = new ProfileJob("XXX Developer", JobStatus.INTERNSHIP, "MCI",
 //                "Tehran", JobWorkplaceStatus.REMOTE, true,
 //                new SimpleDateFormat("yyyy-MM").parse("2022-11"),
 //                new SimpleDateFormat("yyyy-MM").parse("2023-11"),
@@ -82,7 +83,7 @@ public class Main {
 //                ceoExperienceDate, profileSports);
 //
 //        List<ProfileEducation> profileEducations = new ArrayList<>();//############################################
-//        ProfileEducation profileEducation = new ProfileEducation("Mehr Avval",
+//        ProfileEducation profileEducation = new ProfileEducation("Mehr Akhar",
 //                new SimpleDateFormat("yyyy-MM").parse("2024-12")
 //                ,new SimpleDateFormat("yyyy-MM").parse("2025-01"), false,
 //                "15.3", "modir majale", "yo", Arrays.asList(EducationalSkills.EDUCATION),
@@ -96,14 +97,14 @@ public class Main {
 //        profileEducations.add(profileEducation);
 //
 //        List<Certificate> certificates = new ArrayList<>();//#####################################
-//        Certificate certificate = new Certificate("Pro Player AAAAA+", "ESL",
+//        Certificate certificate = new Certificate("Pro Player G+", "ESL",
 //                new SimpleDateFormat("yyyy-MM").parse("2023-01"),
 //                new SimpleDateFormat("yyyy-MM").parse("2023-04"), "UCL 22-12",
-//                "www.sex.com", Arrays.asList("Sex","Aim","Gay"));
+//                "www.seyyx.com", Arrays.asList("Sex","Aim"));
 //        certificates.add(certificate);
 //
 //        ProfileJob currentJob = new ProfileJob("Sex Developer", JobStatus.FULL_TIME,
-//                "Behsa2",
+//                "Behsa",
 //                "Tehran", JobWorkplaceStatus.ON_SITE,
 //                true,
 //                new SimpleDateFormat("yyyy-MM").parse("2024-11"),
@@ -112,8 +113,8 @@ public class Main {
 //                false, true);
 //        ProfileContactInfo profileContactInfo = new ProfileContactInfo("aaa.aaa.com", "a@A.com", "0912", PhoneType.MOBILE_PHONE,
 //                "saghez", new SimpleDateFormat("yyyy-MM").parse("2004-11"), ShowBirthDateTo.ALL, "tel.me/lesbian");
-//        ProfileHeader profileHeader = new ProfileHeader("Parsa", "Enayati", null, "aaa.aaa.com", "aaa.vvv.com", "man gay hastam", currentJob, profileEducation2,
-//                "Iran", "Karaj", "Engineer", profileContactInfo, "Sexy"); //#################
+//        ProfileHeader profileHeader = new ProfileHeader("Moein", "Enayati", null, "aaa.aaa.com", "aaa.vvv.com", "man gay hastam", currentJob, profileEducation2,
+//                "Iran", "Tehran", "Engineer", profileContactInfo, "Sexy"); //#################
 //
 //
 //        ProfileSkills profileSkills = new ProfileSkills(Arrays.asList(JobSkills.DEVOPS, JobSkills.CLOUD_COMPUTING), Arrays.asList(EducationalSkills.DESIGN, EducationalSkills.BIOLOGY)); //######
@@ -127,10 +128,39 @@ public class Main {
 
 //        retrofitBuilder.asyncCallUpload("src/main/resources/test2.mp4");
 //        retrofitBuilder.asyncCallDownload("test2.mp4");
-
+//
 //        SearchProfileRequest searchProfileRequest = new SearchProfileRequest("Moein",null,"Tehran",null,null,null,null);
+//        WatchProfileSearchResults watchProfileSearchResults = retrofitBuilder.watchProfileSearchResults(searchProfileRequest);
+//        System.out.println(watchProfileSearchResults);
+//        ConnectRequest connectRequest = new ConnectRequest(2, "Be man accept Bedahid");
+//        Messages messages = retrofitBuilder.syncCallConnect(connectRequest);
+//        WatchConnectionPendingLists watchConnectionPendingLists = retrofitBuilder.watchConnectionPendingLists();
+//        System.out.println(watchConnectionPendingLists.toString());
+//        WatchConnectionListResponse watchConnectionListResponse = retrofitBuilder.watchConnectionListResponse();
+//        System.out.println(watchConnectionListResponse.toString());
 
-        //ConnectRequest connectRequest = new ConnectRequest(1,);
+//        AcceptConnection acceptConnection = new AcceptConnection(true, 1);
+//        Messages messages = retrofitBuilder.acceptConnection(acceptConnection);
+//        System.out.println(messages.toString());
+//        WatchConnectionListResponse watchConnectionListResponse = retrofitBuilder.watchConnectionListResponse();
+//        System.out.println(watchConnectionListResponse.toString());
+//        WatchConnectionPendingLists watchConnectionPendingLists = retrofitBuilder.watchConnectionPendingLists();
+//        System.out.println(watchConnectionPendingLists.toString());
+
+//        String mediaName = retrofitBuilder.asyncCallUpload("src/main/resources/test2.mp4");
+//        Post post = new Post();
+//        post.setText("Hi bitches");
+//        List<String> hashtags = new ArrayList<>();
+//        hashtags.add("kir");
+//        hashtags.add("kos");
+//        hashtags.add("koon");
+//        post.setHashtags(hashtags);
+//        post.setMediaName(mediaName);
+//        retrofitBuilder.syncCallPost(post);
+//
+//        WatchPostSearchResults watchPostSearchResults = retrofitBuilder.searchPostRequest(new SearchPostsRequest("Hi"));
+//        System.out.println(watchPostSearchResults.toString());
+//        retrofitBuilder.asyncCallDownload(watchPostSearchResults.getPosts().get(0).getMediaName());
 
     }
 }
