@@ -50,6 +50,8 @@ public class Main {
 //        createTableProfileContactsInfo();
 //        createTableProfileHeader();
 //        createTableCertificate();
+//        createTableUserWatchList();
+//        createTableNotification();
 
         System.out.println("please enter the IP you want the server to run on:");
         Scanner scanner = new Scanner(System.in);

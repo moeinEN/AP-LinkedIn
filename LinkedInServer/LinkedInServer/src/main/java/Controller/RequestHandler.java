@@ -754,4 +754,31 @@ public class RequestHandler {
                 os.write(response);
             }        }
     }
+    public static void validateToken(HttpExchange exchange) throws IOException, SQLException {
+        if ("GET".equals(exchange.getRequestMethod())) {
+            byte[] response;
+            int responseCode;
+
+            Headers requestHeaders = exchange.getRequestHeaders();
+            int userId = JwtHandler.validateSessionToken(requestHeaders);
+            if(userId == -1) {
+                response = UNAUTHORIZED.toByte("UTF-8");
+                responseCode = UNAUTHORIZED.getStatusCode();
+            }
+            else {
+                response = SUCCESS.toByte("UTF-8");
+                responseCode = SUCCESS.getStatusCode();
+            }
+            exchange.sendResponseHeaders(responseCode, response.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(response);
+            }
+        } else {
+            byte[] response = METHOD_NOT_ALLOWED.toByte("UTF-8");
+            exchange.sendResponseHeaders(METHOD_NOT_ALLOWED.getStatusCode(), response.length); // 405 Method Not Allowed
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(response);
+            }
+        }
+    }
 }

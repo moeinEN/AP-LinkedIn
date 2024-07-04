@@ -71,4 +71,8 @@ public interface UserService {
     Call<ResponseBody> watchPendingConnections(@Header("sessionToken") String sessionToken);
 
     @POST("/post")
-    Call<ResponseBody> post(@Body Post post, @Header("sessionToken") String sessionToken);}
+    Call<ResponseBody> post(@Body Post post, @Header("sessionToken") String sessionToken);
+
+    @GET("/validateToken")
+    Call<ResponseBody> validateToken(@Header("sessionToken") String sessionToken);
+}
