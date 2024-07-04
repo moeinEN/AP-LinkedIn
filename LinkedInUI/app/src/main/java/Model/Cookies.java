@@ -1,12 +1,5 @@
 package Model;
 
-import lombok.Getter;
-import lombok.Setter;
-
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-
 public class Cookies {
     private static String sessionToken;
     private static String profileIdentification;

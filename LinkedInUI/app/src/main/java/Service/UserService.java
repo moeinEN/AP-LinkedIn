@@ -2,7 +2,6 @@ package Service;
 
 import Model.Post;
 import Model.Requests.*;
-import Model.Response.WatchConnectionPendingLists;
 import Model.User;
 import com.google.gson.JsonObject;
 import okhttp3.MultipartBody;

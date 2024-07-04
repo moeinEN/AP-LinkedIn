@@ -1,10 +1,8 @@
 package Model.Requests;
 
-import Model.JobSkills;
 import Model.JobStatus;
 import lombok.*;
 
-import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor

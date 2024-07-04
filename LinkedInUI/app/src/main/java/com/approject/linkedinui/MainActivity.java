@@ -1,5 +1,7 @@
 package com.approject.linkedinui;
 
+import static com.approject.linkedinui.runtimeconstants.SharedPreferencesNames.*;
+
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
@@ -12,9 +14,12 @@ import androidx.navigation.ui.NavigationUI;
 import com.approject.linkedinui.databinding.ActivityMainBinding;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import Controller.RetrofitBuilder;
+
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
+    private SharedPreferences userData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,14 +36,13 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
-        // Storing data into SharedPreferences
-        SharedPreferences sharedPreferences = getSharedPreferences("UserData",MODE_PRIVATE);
 
-        SharedPreferences.Editor userDataEditor = sharedPreferences.edit();
-
-        userDataEditor.putString("name", "ggname");
-        userDataEditor.putString("age", "ggage");
-        userDataEditor.commit();
+        userData = getSharedPreferences(USER_DATA, MODE_PRIVATE);
+        String token = userData.getString("token", "");
+        String serverIP = "192.168.1.5";
+        RetrofitBuilder clientInterface = new RetrofitBuilder("http://" + serverIP + ":8080");
+        //LoginCredentials loginCredentials = new LoginCredentials("Goostavo", "tEST@123");
+        //Messages loginResp = clientInterface.syncCallLogin(loginCredentials);
     }
 
     @Override

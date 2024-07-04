@@ -2,7 +2,7 @@ package Model.Response;
 
 import Model.ConnectionPendingObject;
 import Model.Messages;
-import Model.MiniProfile;
+
 import com.google.gson.Gson;
 import lombok.*;
 

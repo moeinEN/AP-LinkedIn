@@ -16,7 +16,6 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.io.File;
-import java.util.Scanner;
 
 import org.apache.commons.io.FilenameUtils;
 
