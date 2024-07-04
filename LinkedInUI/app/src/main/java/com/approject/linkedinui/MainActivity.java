@@ -55,13 +55,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         serverIP = userData.getString(IP_ADDRESS, "");
-        if(!serverIP.isEmpty()) {
-
+        //if(serverIP.isEmpty()) {
+        if(!serverIP.equals("192.168.1.5")){
             Intent intent = new Intent(this, IPGetterActivity.class);
             startActivity(intent);
 
             serverIP = userData.getString(IP_ADDRESS, "");
-            //finish();
+            finish();
 
         }
 
