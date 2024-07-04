@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private SharedPreferences userData;
     private String serverIP;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +42,9 @@ public class MainActivity extends AppCompatActivity {
 
         userData = getSharedPreferences(USER_DATA, MODE_PRIVATE);
 
+        progressDialog = new ProgressDialog(MainActivity.this);
+        progressDialog.setMessage("Loading...");
+        progressDialog.setCancelable(false); // Prevent user from dismissing it
 
     }
 
@@ -56,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         serverIP = userData.getString(IP_ADDRESS, "");
         //if(serverIP.isEmpty()) {
-        if(!serverIP.equals("192.168.1.5")){
+        if(serverIP.equals("")){
             Intent intent = new Intent(this, IPGetterActivity.class);
             startActivity(intent);
 
@@ -65,12 +69,10 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
-        Toast.makeText(this, serverIP, Toast.LENGTH_LONG).show();
-        String token = userData.getString("token", "");
+        //Toast.makeText(this, serverIP, Toast.LENGTH_LONG).show();
+        String token = userData.getString(TOKEN, "");
         RetrofitBuilder clientInterface = new RetrofitBuilder("http://" + serverIP + ":8080");
-        ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
-        progressDialog.setMessage("Loading...");
-        progressDialog.setCancelable(false); // Prevent user from dismissing it
+
 
 
         new AsyncTask<Void, Void, Messages>() {

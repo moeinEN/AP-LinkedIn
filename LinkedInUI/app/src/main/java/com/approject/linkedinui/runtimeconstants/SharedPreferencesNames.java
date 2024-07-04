@@ -4,4 +4,5 @@ public class SharedPreferencesNames
 {
     final public static String USER_DATA = "UserData";
     final public static String IP_ADDRESS = "IPAddress";
+    final public static String TOKEN = "Token";
 }
