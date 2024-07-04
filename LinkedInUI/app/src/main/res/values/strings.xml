@@ -49,5 +49,8 @@
     <string name="error_generic">An error occurred. Please try again.</string>
     <string name="ok_button_text">OK</string>
     <string name="cancel_button_text">Cancel</string>
+    <string name="server_ip_hint">server IP address</string>
+    <string name="submit_button_text">submit</string>
+    <string name="enter_server_ip_text">Enter Server IP below:</string>
 
 </resources>
