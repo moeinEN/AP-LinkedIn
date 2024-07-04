@@ -75,4 +75,7 @@ public interface UserService {
 
     @GET("/validateToken")
     Call<ResponseBody> validateToken(@Header("sessionToken") String sessionToken);
+
+    @GET("/getWatchList")
+    Call<ResponseBody> getWatchList(@Header("sessionToken") String sessionToken);
 }

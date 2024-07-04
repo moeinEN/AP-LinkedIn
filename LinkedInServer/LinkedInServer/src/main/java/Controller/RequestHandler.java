@@ -781,4 +781,42 @@ public class RequestHandler {
             }
         }
     }
+    public static void getWatchList(HttpExchange exchange) throws IOException, SQLException {
+        if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) { // make other method equals check to equalsIgonreCase
+            byte[] response;
+            int responseCode;
+
+            Headers requestHeaders = exchange.getRequestHeaders();
+            int userId = JwtHandler.validateSessionToken(requestHeaders);
+            if (userId == -1) {
+                exchange.sendResponseHeaders(401, -1); // 401 unauthorized
+                return;
+            } else {
+                try (InputStream requestBody = exchange.getRequestBody();
+                     InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
+                    try {
+                        try {
+                            response = DatabaseQueryController.getWatchList(userId).toByte("UTF-8");
+                            responseCode = SUCCESS.getStatusCode();
+                        } catch (Exception exception) {
+                            exception.printStackTrace();
+                            exchange.sendResponseHeaders(400, -1); // 400 bad request
+                            return;
+                        }
+                    } catch (IllegalArgumentException e) {
+                        logger.info(e.getMessage());
+                        exchange.sendResponseHeaders(400, -1); // 400 bad request
+                        return;
+                    }
+                }
+                exchange.sendResponseHeaders(responseCode, response.length); // use the actual length of the response body
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(response);
+                }
+            }
+        } else {
+            exchange.sendResponseHeaders(405, -1); // 405 method not-allowed
+            return;
+        }
+    }
 }

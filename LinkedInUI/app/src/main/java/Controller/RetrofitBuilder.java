@@ -408,4 +408,26 @@ public class RetrofitBuilder implements NetworkRequest{
             ex.printStackTrace();
             return null;
         }
-    }}
+    }
+
+    public WatchPostResponse getWatchList() {
+        UserService service = retrofit.create(UserService.class);
+        Call<ResponseBody> callGetWatchList = service.getWatchList(Cookies.getSessionToken());
+        WatchPostResponse watchPostResponse;
+        try {
+            Response<ResponseBody> response = callGetWatchList.execute();
+            if (response.isSuccessful() && response.body() != null) {
+                byte[] responseBodeBytes = response.body().bytes();
+                Gson gson = new Gson();
+                watchPostResponse = gson.fromJson(new String(responseBodeBytes), WatchPostResponse.class);
+
+                return watchPostResponse;
+            } else {
+                return null;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+}
