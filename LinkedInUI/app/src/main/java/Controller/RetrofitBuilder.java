@@ -118,7 +118,7 @@ public class RetrofitBuilder implements NetworkRequest{
                 responseString = gson.fromJson(new String(responseBodyBytes), String.class);
                 Cookies.setSessionToken(responseString);
             } else {
-                return Messages.INTERNAL_ERROR;
+                return Messages.INVALID_CREDENTIALS;
             }
         } catch (Exception ex) {
             ex.printStackTrace();
