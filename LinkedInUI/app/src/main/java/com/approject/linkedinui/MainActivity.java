@@ -2,8 +2,11 @@ package com.approject.linkedinui;
 
 import static com.approject.linkedinui.runtimeconstants.SharedPreferencesNames.*;
 
+import android.app.ProgressDialog;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
@@ -15,6 +18,8 @@ import com.approject.linkedinui.databinding.ActivityMainBinding;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import Controller.RetrofitBuilder;
+import Model.Messages;
+import Model.Requests.LoginCredentials;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -43,6 +48,45 @@ public class MainActivity extends AppCompatActivity {
         RetrofitBuilder clientInterface = new RetrofitBuilder("http://" + serverIP + ":8080");
         //LoginCredentials loginCredentials = new LoginCredentials("Goostavo", "tEST@123");
         //Messages loginResp = clientInterface.syncCallLogin(loginCredentials);
+        ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
+        progressDialog.setMessage("Loading...");
+        progressDialog.setCancelable(false); // Prevent user from dismissing it
+
+
+        // Execute foo() in background thread using anonymous AsyncTask
+        new AsyncTask<Void, Void, Messages>() {
+
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                progressDialog.show();
+                // Optional: Show loading dialog before background work starts
+            }
+
+            @Override
+            protected Messages doInBackground(Void... voids) {
+                // Call your foo() method here which sends the HTTP request
+                LoginCredentials loginCredentials = new LoginCredentials("Goostavo", "tEST@123");
+                Messages loginResp = clientInterface.syncCallLogin(loginCredentials);
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                return loginResp;
+            }
+
+            @Override
+            protected void onPostExecute(Messages result) {
+                super.onPostExecute(result);
+                // Dismiss loading dialog after background work finishes
+                progressDialog.dismiss();
+                Toast.makeText(MainActivity.this, result.getMessage() + result.getStatusCode(), Toast.LENGTH_LONG).show();
+                // Handle the result from foo() (e.g., update UI)
+                // ...
+            }
+        }.execute();
+
     }
 
     @Override
