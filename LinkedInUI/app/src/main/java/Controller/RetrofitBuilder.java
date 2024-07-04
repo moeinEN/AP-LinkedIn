@@ -127,6 +127,26 @@ public class RetrofitBuilder implements NetworkRequest{
         return Messages.USER_LOGGED_IN_SUCCESSFULLY;
     }
 
+    public Messages validateToken() {
+        UserService service = retrofit.create(UserService.class);
+        Call<ResponseBody> callValidate = service.validateToken(Cookies.getSessionToken());
+        Messages serverResponse;
+        try {
+            Response<ResponseBody> response = callValidate.execute();
+            if (response.isSuccessful() && response.body() != null) {
+                byte[] responseBodyBytes = response.body().bytes();
+                Gson gson = new Gson();
+                serverResponse = gson.fromJson(new String(responseBodyBytes), Messages.class);
+                return serverResponse;
+            } else {
+                return Messages.INTERNAL_ERROR;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return Messages.INTERNAL_ERROR;
+        }
+    }
+
     public Messages syncCallProfile(CreateProfileRequest profile) {
         UserService service = retrofit.create(UserService.class);
         Call<ResponseBody> callProfile = service.profile(profile, Cookies.getSessionToken());
