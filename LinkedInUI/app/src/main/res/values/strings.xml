@@ -1,6 +1,53 @@
 <resources>
-    <string name="app_name">LinkedInUI</string>
+    <string name="app_name">AP LinkedIn</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
+
+    <string name="login_title">Welcome Back</string>
+    <string name="username_hint">Email or Username</string>
+    <string name="password_hint">Password</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="login_button_text">Log In</string>
+    <string name="no_account_text">Don\'t have an account?</string>
+    <string name="sign_up_button_text">Sign Up</string>
+    <string name="login_error_invalid_credentials">Invalid username or password.</string>
+    <string name="login_error_network">Network error. Please try again later.</string>
+
+    <string name="signup_title">Create Your Profile</string>
+    <string name="first_name_hint">First Name</string>
+    <string name="last_name_hint">Last Name</string>
+    <string name="email_hint">Email Address</string>
+    <string name="confirm_email_hint">Confirm Email Address</string>
+    <string name="password_create_hint">Create Password</string>
+    <string name="confirm_password_hint">Confirm Password</string>
+    <string name="signup_button_text">Sign Up</string>
+    <string name="signup_error_empty_field">Please fill in all fields.</string>
+    <string name="signup_error_password_mismatch">Passwords do not match.</string>
+    <string name="signup_error_email_invalid">Please enter a valid email address.</string>
+    <string name="signup_success_message">Your account has been created! Please check your email for verification.</string>
+
+    <string name="profile_title">My Profile</string>
+    <string name="edit_profile_button_text">Edit Profile</string>
+    <string name="connections_title">Connections</string>
+    <string name="no_connections_text">You don\'t have any connections yet. Start building your network!</string>
+    <string name="posts_title">Posts</string>
+    <string name="no_posts_text">You haven\'t created any posts yet. Share your thoughts and experiences!</string>
+
+    <string name="home_button_text">Home</string>
+    <string name="search_button_text">Search</string>
+    <string name="notifications_button_text">Notifications</string>
+    <string name="inbox_button_text">Messages</string>
+    <string name="more_button_text">More</string>
+
+    <string name="create_post_title">Create a Post</string>
+    <string name="write_something_hint">What\'s on your mind?</string>
+    <string name="post_button_text">Post</string>
+
+    <string name="search_hint">Search for people, jobs, or companies</string>
+
+    <string name="error_generic">An error occurred. Please try again.</string>
+    <string name="ok_button_text">OK</string>
+    <string name="cancel_button_text">Cancel</string>
+
 </resources>
