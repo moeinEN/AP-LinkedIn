@@ -9,8 +9,8 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 public class LoginCredentials {
-    @SerializedName("username")
-    private String username;
+    @SerializedName("email")
+    private String email;
     @SerializedName("password")
     private String password;
 }

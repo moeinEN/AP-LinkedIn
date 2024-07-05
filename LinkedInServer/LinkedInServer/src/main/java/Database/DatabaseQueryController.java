@@ -59,7 +59,35 @@ public class DatabaseQueryController {
         createTable(sql);
     }
 
-
+    public static User getUserByEmail(String email) throws SQLException {
+        String sql = String.format("SELECT * FROM USER WHERE email = '%s';", email);
+        Connection db = null;
+        Statement stmt = null;
+        db = DbController.getConnection();
+        db.setAutoCommit(true);
+        stmt = db.createStatement();
+        try {
+            ResultSet rs = stmt.executeQuery(sql);
+            if (Objects.isNull(rs)) {
+                return null;
+            }
+            User user = new User();
+            while (rs.next()) {
+                user.setId(rs.getInt("id"));
+                user.setUsername(rs.getString("username"));
+                user.setPassword(rs.getString("password"));
+                user.setEmail(rs.getString("email"));
+            }
+            return user;
+        } catch ( Exception e ) {
+            e.printStackTrace();
+            return null;
+        }
+        finally {
+            stmt.close();
+            db.close();
+        }
+    }
     public static User getUser(String username) throws SQLException {
         String sql = String.format("SELECT * FROM USER WHERE username = '%s';", username);
         Connection db = null;
@@ -163,7 +191,7 @@ public class DatabaseQueryController {
             stmt = db.createStatement();
 
             // search for valid login credentials
-            String usernameCheckSql = String.format("SELECT * FROM USER WHERE username = '%s' AND password = '%s'", loginCredentials.getUsername(), loginCredentials.getPassword());
+            String usernameCheckSql = String.format("SELECT * FROM USER WHERE email = '%s' AND password = '%s'", loginCredentials.getEmail(), loginCredentials.getPassword());
             try {
                 ResultSet userRs = stmt.executeQuery(usernameCheckSql);
                 if(!userRs.next()) {

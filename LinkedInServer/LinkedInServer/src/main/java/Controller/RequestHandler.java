@@ -134,7 +134,7 @@ public class RequestHandler {
 
             Messages loginMessage = DatabaseQueryController.checkCredentials(recievedLoginCredentials);
             if(loginMessage == Messages.SUCCESS) {
-                User loginUser = DatabaseQueryController.getUser(recievedLoginCredentials.getUsername());
+                User loginUser = DatabaseQueryController.getUserByEmail(recievedLoginCredentials.getEmail());
                 response = JwtHandler.createJwtToken(((Long) loginUser.getId()).toString(), loginUser.getUsername(), loginUser.getPassword(), loginUser.getEmail(), 3600000L);
             }
             else {
