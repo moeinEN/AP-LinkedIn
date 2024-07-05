@@ -52,18 +52,15 @@ public class MainActivity extends AppCompatActivity {
         if(serverIP.equals("")){
             Intent intent = new Intent(this, IPGetterActivity.class);
             startActivity(intent);
-
-            //serverIP = userData.getString(IP_ADDRESS, "");
             finish();
         }
-
         //Toast.makeText(this, serverIP, Toast.LENGTH_LONG).show();
-        String token = userData.getString(TOKEN, "");
-
         RetrofitBuilder clientInterface = new RetrofitBuilder("http://" + serverIP + ":8080");
         RetrofitBuilder.clientInterface = clientInterface;
+        String token = userData.getString(TOKEN, "");
+        System.out.println("###"+token+"###");
         Cookies.setSessionToken(token);
-        if(token.equals("") || !clientInterface.validateToken().getMessage().equals(Messages.SUCCESS)){
+        if(token.equals("")){// || !clientInterface.validateToken().getMessage().equals(Messages.SUCCESS)){
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
             finish();

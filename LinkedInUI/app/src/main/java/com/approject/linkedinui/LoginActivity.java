@@ -1,8 +1,11 @@
 package com.approject.linkedinui;
 
+import static com.approject.linkedinui.runtimeconstants.SharedPreferencesNames.TOKEN;
+import static com.approject.linkedinui.runtimeconstants.SharedPreferencesNames.USER_DATA;
 import static Controller.InputStringValidator.validateEmail;
 import static Controller.InputStringValidator.validatePassword;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -18,6 +21,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import Controller.CallBack.LoginCallback;
 import Controller.RetrofitBuilder;
+import Model.Cookies;
 import Model.Messages;
 import Model.Requests.LoginCredentials;
 import Model.Requests.RegisterCredentials;
@@ -26,6 +30,7 @@ public class LoginActivity extends AppCompatActivity {
 
     EditText emailText, passwordText;
     Button loginButton, signUpButton;
+    ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,18 +70,29 @@ public class LoginActivity extends AppCompatActivity {
 
                 LoginCredentials loginCredentials = new LoginCredentials(email, password);
 //                Messages loginResp = RetrofitBuilder.clientInterface.syncCallLogin(loginCredentials);
-
+                progressDialog = new ProgressDialog(LoginActivity.this);
+                progressDialog.setMessage("Loading...");
+                progressDialog.setCancelable(false); // Prevent user from dismissing it
+                progressDialog.show();
                RetrofitBuilder.clientInterface.asyncCallLogin(loginCredentials, new LoginCallback() {
                     @Override
                     public void onSuccess(Messages message) {
                         runOnUiThread(() -> {
+                            progressDialog.hide();
                             Toast.makeText(LoginActivity.this, R.string.login_success, Toast.LENGTH_SHORT).show();
+
                         });
+                        getSharedPreferences(USER_DATA, MODE_PRIVATE).edit().putString(TOKEN, Cookies.getSessionToken()).commit();
+                        System.out.println("TOKEN:{" + Cookies.getSessionToken() + "}");
+                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                        startActivity(intent);
+                        finish();
                     }
 
                     @Override
                     public void onFailure(Messages message) {
                         runOnUiThread(() -> {
+                            progressDialog.hide();
                             if (message.equals(Messages.INVALID_CREDENTIALS)) {
                                 Toast.makeText(LoginActivity.this, R.string.invalid_credentials, Toast.LENGTH_SHORT).show();
                             } else if (message.equals(Messages.INTERNAL_ERROR)) {
@@ -88,9 +104,7 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
 
-                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                startActivity(intent);
-                finish();
+
             }
         });
         
