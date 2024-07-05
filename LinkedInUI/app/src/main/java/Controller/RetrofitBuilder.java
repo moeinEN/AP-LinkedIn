@@ -172,21 +172,34 @@ public class RetrofitBuilder {
         }
     }
 
-    public Messages syncCallProfile(CreateProfileRequest profile) {
+    public void asyncCallProfile(CreateProfileRequest profile, ProfileCallback callback) {
         UserService service = retrofit.create(UserService.class);
         Call<ResponseBody> callProfile = service.profile(profile, Cookies.getSessionToken());
-        Messages ServerResponse;
-        try {
-            Response<ResponseBody> response = callProfile.execute();
-            byte[] responseBodyBytes = response.body().bytes();
-            Gson gson = new Gson();
-            ServerResponse = gson.fromJson(new String(responseBodyBytes), Messages.class);
 
-            return ServerResponse;
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return Messages.INTERNAL_ERROR;
-        }
+        callProfile.enqueue(new retrofit2.Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    try {
+                        byte[] responseBodyBytes = response.body().bytes();
+                        Gson gson = new Gson();
+                        Messages serverResponse = gson.fromJson(new String(responseBodyBytes), Messages.class);
+                        callback.onSuccess(serverResponse);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        callback.onFailure("Internal error: " + e.getMessage());
+                    }
+                } else {
+                    callback.onFailure("Request failed. Code: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                t.printStackTrace();
+                callback.onFailure("Request failed: " + t.getMessage());
+            }
+        });
     }
 
     public Messages syncCallLike(LikeRequest like) {

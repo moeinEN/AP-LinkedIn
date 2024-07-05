@@ -19,10 +19,12 @@ import androidx.navigation.ui.NavigationUI;
 import com.approject.linkedinui.databinding.ActivityMainBinding;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import Controller.CallBack.ProfileCallback;
 import Controller.CallBack.ProfileIdCallback;
 import Controller.RetrofitBuilder;
 import Model.Cookies;
 import Model.Messages;
+import Model.Requests.CreateProfileRequest;
 import Model.Requests.LoginCredentials;
 
 public class MainActivity extends AppCompatActivity {
