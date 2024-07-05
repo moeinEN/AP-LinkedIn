@@ -1,6 +1,7 @@
 package Controller;
 
 
+import Controller.CallBack.*;
 import Model.*;
 import Model.Requests.*;
 import Model.Response.*;
@@ -16,12 +17,15 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.apache.commons.io.FilenameUtils;
 
 import static Controller.FileController.writeResponseBodyToDisk;
 
-public class RetrofitBuilder implements NetworkRequest{
+import androidx.annotation.NonNull;
+
+public class RetrofitBuilder {
     private static String BASE_URL;
     private Retrofit retrofit;
     public static RetrofitBuilder clientInterface;
@@ -88,43 +92,64 @@ public class RetrofitBuilder implements NetworkRequest{
         }
     }
 
-    public Messages syncCallSignUp(RegisterCredentials registerCredentials) {
+    public void asyncCallSignUp(RegisterCredentials registerCredentials, SignUpCallback callback) {
         UserService service = retrofit.create(UserService.class);
-        Call<ResponseBody> callSync = service.signUp(registerCredentials);
+        Call<ResponseBody> callAsync = service.signUp(registerCredentials);
 
-        try {
-            Response<ResponseBody> response = callSync.execute();
-            if (response.isSuccessful() && response.body() != null) {
-                byte[] responseBodyBytes = response.body().bytes();
-                return Messages.fromByte(responseBodyBytes);
-            } else {
-                return Messages.INTERNAL_ERROR;
+        callAsync.enqueue(new retrofit2.Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    try {
+                        byte[] responseBodyBytes = response.body().bytes();
+                        Messages message = Messages.fromByte(responseBodyBytes);
+                        callback.onSuccess(message);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        callback.onFailure(Messages.INTERNAL_ERROR);
+                    }
+                } else {
+                    callback.onFailure(Messages.INTERNAL_ERROR);
+                }
             }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return Messages.INTERNAL_ERROR;
-        }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                t.printStackTrace();
+                callback.onFailure(Messages.INTERNAL_ERROR);
+            }
+        });
     }
 
-    public Messages syncCallLogin(LoginCredentials loginCredentials) {
+    public void asyncCallLogin(LoginCredentials loginCredentials, LoginCallback callback) {
         UserService service = retrofit.create(UserService.class);
         Call<ResponseBody> callLogin = service.login(loginCredentials);
-        String responseString;
-        try {
-            Response<ResponseBody> response = callLogin.execute();
-            if (response.isSuccessful() && response.body() != null) {
-                byte[] responseBodyBytes = response.body().bytes();
-                Gson gson = new Gson();
-                responseString = gson.fromJson(new String(responseBodyBytes), String.class);
-                Cookies.setSessionToken(responseString);
-            } else {
-                return Messages.INVALID_CREDENTIALS;
+
+        callLogin.enqueue(new retrofit2.Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    try {
+                        byte[] responseBodyBytes = response.body().bytes();
+                        Gson gson = new Gson();
+                        String responseString = gson.fromJson(new String(responseBodyBytes), String.class);
+                        Cookies.setSessionToken(responseString);
+                        callback.onSuccess(Messages.USER_LOGGED_IN_SUCCESSFULLY);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        callback.onFailure(Messages.INTERNAL_ERROR);
+                    }
+                } else {
+                    callback.onFailure(Messages.INVALID_CREDENTIALS);
+                }
             }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return Messages.INTERNAL_ERROR;
-        }
-        return Messages.USER_LOGGED_IN_SUCCESSFULLY;
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                t.printStackTrace();
+                callback.onFailure(Messages.INTERNAL_ERROR);
+            }
+        });
     }
 
     public Messages validateToken() {

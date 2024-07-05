@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
 //        LoginCredentials loginCredentials = new LoginCredentials("Goostavo", "tEST@123");
 //        Messages loginResp = clientInterface.syncCallLogin(loginCredentials);
 //        progressDialog.dismiss();
-        Toast.makeText(MainActivity.this,  serverIP, Toast.LENGTH_SHORT).show();
+//        Toast.makeText(MainActivity.this,  serverIP, Toast.LENGTH_SHORT).show();
 
     }
 }

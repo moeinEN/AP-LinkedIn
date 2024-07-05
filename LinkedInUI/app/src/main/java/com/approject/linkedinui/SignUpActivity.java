@@ -12,6 +12,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -21,6 +22,10 @@ import Controller.RetrofitBuilder;
 import Model.Messages;
 import Model.Requests.LoginCredentials;
 import Model.Requests.RegisterCredentials;
+import kotlin.coroutines.CoroutineContext;
+import kotlinx.coroutines.CoroutineScope;
+import kotlinx.coroutines.Dispatchers;
+import Controller.CallBack.SignUpCallback;
 
 public class SignUpActivity extends AppCompatActivity {
 
@@ -77,24 +82,49 @@ public class SignUpActivity extends AppCompatActivity {
                     Toast.makeText(SignUpActivity.this, R.string.signup_error_password_mismatch, Toast.LENGTH_SHORT).show();
                     return;
                 }
-                TAKEN_USERNAME("This username is already taken!", 0),
-                        INVALID_USERNAME("Username is invalid!", 1),
-                        INVALID_PASSWORD("Password is invalid!", 2),
-                        CONFIRMATION_PASSWORD("Confirmation does not match the password!", 3),
-                        INVALID_EMAIL("email is invalid!", 4),
-                        EMAIL_EXISTS("email already exists!", 5),
-                        INTERNAL_ERROR("Internal error!", 6),
+
                 RegisterCredentials registerCredentials = new RegisterCredentials(email, password, confirmPassword, username);
-                Messages signupResp = RetrofitBuilder.clientInterface.syncCallSignUp(registerCredentials);
-                if(!signupResp.equals(Messages.SUCCESS)) {
-                    if(signupResp.equals(Messages.INVALID_CREDENTIALS)) {
-                        Toast.makeText(LoginActivity.this, R.string.login_error_invalid_credentials, Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(LoginActivity.this, R.string.login_error_network, Toast.LENGTH_SHORT).show();
+//                Messages signupResp = RetrofitBuilder.clientInterface.syncCallSignUp(registerCredentials);
+
+                RetrofitBuilder.clientInterface.asyncCallSignUp(registerCredentials, new SignUpCallback() {
+                    @Override
+                    public void onSuccess(Messages message) {
+                        System.out.println("######" + message + "#####");
+                        if (message.equals(Messages.SUCCESS)){
+                            runOnUiThread(() -> Toast.makeText(SignUpActivity.this, R.string.signup_success_message, Toast.LENGTH_SHORT).show());
+                        }
+                        else if (message.equals(Messages.INVALID_EMAIL)) {
+                            runOnUiThread(() -> Toast.makeText(SignUpActivity.this, R.string.signup_error_email_invalid, Toast.LENGTH_SHORT).show());
+                        }
+                        else if(message.equals(Messages.INVALID_USERNAME)) {
+                            runOnUiThread(() -> Toast.makeText(SignUpActivity.this, R.string.invalid_username, Toast.LENGTH_SHORT).show());
+                        }
+                        else if(message.equals(Messages.INVALID_PASSWORD)) {
+                            runOnUiThread(() -> Toast.makeText(SignUpActivity.this, R.string.invalid_password, Toast.LENGTH_SHORT).show());
+                        }
+                        else if(message.equals(Messages.CONFIRMATION_PASSWORD)) {
+                            runOnUiThread(() -> Toast.makeText(SignUpActivity.this, R.string.signup_error_password_mismatch, Toast.LENGTH_SHORT).show());
+                        }
+                        else if(message.equals(Messages.EMAIL_EXISTS)) {
+                            runOnUiThread(() -> Toast.makeText(SignUpActivity.this, R.string.email_exist, Toast.LENGTH_SHORT).show());
+                        }
+                        else if(message.equals(Messages.TAKEN_USERNAME)) {
+                            runOnUiThread(() -> Toast.makeText(SignUpActivity.this, R.string.username_exist, Toast.LENGTH_SHORT).show());
+                        }
+                        else if(message.equals(Messages.INTERNAL_ERROR)) {
+                            runOnUiThread(() -> Toast.makeText(SignUpActivity.this, R.string.internal_error, Toast.LENGTH_SHORT).show());
+                        }  else {
+                            runOnUiThread(() -> Toast.makeText(SignUpActivity.this, R.string.login_error_network, Toast.LENGTH_SHORT).show());
+                        }
                     }
-                    return;
-                }
-                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+
+                    @Override
+                    public void onFailure(Messages message) {
+                        runOnUiThread(() -> Toast.makeText(SignUpActivity.this, R.string.internal_error, Toast.LENGTH_SHORT).show());
+                    }
+                });
+
+                Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
                 startActivity(intent);
                 finish();
             }

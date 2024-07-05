@@ -16,6 +16,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import Controller.CallBack.LoginCallback;
 import Controller.RetrofitBuilder;
 import Model.Messages;
 import Model.Requests.LoginCredentials;
@@ -61,16 +62,32 @@ public class LoginActivity extends AppCompatActivity {
                     Toast.makeText(LoginActivity.this, R.string.invalid_password, Toast.LENGTH_SHORT).show();
                     return;
                 }
+
                 LoginCredentials loginCredentials = new LoginCredentials(email, password);
-                Messages loginResp = RetrofitBuilder.clientInterface.syncCallLogin(loginCredentials);
-                if(!loginResp.equals(Messages.USER_LOGGED_IN_SUCCESSFULLY)) {
-                    if(loginResp.equals(Messages.INVALID_CREDENTIALS)) {
-                        Toast.makeText(LoginActivity.this, R.string.login_error_invalid_credentials, Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(LoginActivity.this, R.string.login_error_network, Toast.LENGTH_SHORT).show();
+//                Messages loginResp = RetrofitBuilder.clientInterface.syncCallLogin(loginCredentials);
+
+               RetrofitBuilder.clientInterface.asyncCallLogin(loginCredentials, new LoginCallback() {
+                    @Override
+                    public void onSuccess(Messages message) {
+                        runOnUiThread(() -> {
+                            Toast.makeText(LoginActivity.this, R.string.login_success, Toast.LENGTH_SHORT).show();
+                        });
                     }
-                    return;
-                }
+
+                    @Override
+                    public void onFailure(Messages message) {
+                        runOnUiThread(() -> {
+                            if (message.equals(Messages.INVALID_CREDENTIALS)) {
+                                Toast.makeText(LoginActivity.this, R.string.invalid_credentials, Toast.LENGTH_SHORT).show();
+                            } else if (message.equals(Messages.INTERNAL_ERROR)) {
+                                Toast.makeText(LoginActivity.this, R.string.internal_error, Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(LoginActivity.this, R.string.login_error_network, Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                });
+
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                 startActivity(intent);
                 finish();

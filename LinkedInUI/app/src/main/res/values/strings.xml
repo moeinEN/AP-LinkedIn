@@ -5,7 +5,7 @@
     <string name="title_notifications">Notifications</string>
 
     <string name="login_title">Welcome Back</string>
-    <string name="username_hint">Your Full Name</string>
+    <string name="username_hint">Username</string>
     <string name="password_hint">Password</string>
     <string name="forgot_password">Forgot Password?</string>
     <string name="login_button_text">Log In</string>
@@ -13,6 +13,8 @@
     <string name="sign_up_button_text">Sign Up</string>
     <string name="login_error_invalid_credentials">Invalid username or password.</string>
     <string name="login_error_network">Network error. Please try again later.</string>
+    <string name="login_success">Logged in successfully</string>
+    <string name="invalid_credentials">Invalid email or password</string>
 
     <string name="signup_title">Welcome to AP-LinkedIn!</string>
     <string name="first_name_hint">First Name</string>
@@ -55,5 +57,8 @@
     <string name="invalid_email">Invalid Email</string>
     <string name="invalid_password">Invalid Password format</string>
     <string name="invalid_username">Invalid Username</string>
+    <string name="email_exist">This email is already registered</string>
+    <string name="username_exist">This username is already registered</string>
+    <string name="internal_error">Internal server error, please try again</string>
 
 </resources>
