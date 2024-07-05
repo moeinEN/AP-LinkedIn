@@ -3,7 +3,7 @@ package Controller;
 public class InputStringValidator {
 
     private static final String EMAIL_REGEX = "^[\\w!#$%&'*+/=?^`{|}~-]+(?:\\.[\\w!#$%&'*+/=?^`{|}~-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}$";
-    private static final String USERNAME_REGEX = "^[\\p{L}ا-ي]+$"; // Matches English and Arabic letters
+    private static final String USERNAME_REGEX = "^[\\w]+$"; // Matches English and Arabic letters
 
     public static boolean validateEmail(String email) {
         if (email == null || email.isEmpty()) {
@@ -33,6 +33,27 @@ public class InputStringValidator {
             return false;
         }
         return username.matches(USERNAME_REGEX);
+    }
+
+    public static boolean validateName(String name) {
+        if (name == null || name.isEmpty() || name.length() > 20) {
+            return false;
+        }
+        return name.matches("^[\\p{L}ا-ي]+$"); // Matches English and Arabic letters only
+    }
+
+    public static boolean validateLastName(String lastName) {
+        if (lastName == null || lastName.isEmpty() || lastName.length() > 40) {
+            return false;
+        }
+        return validateName(lastName); // Reusing validateName for letter check
+    }
+
+    public static boolean validateSize(int n, String input) {
+        if (input == null || input.isEmpty() || input.length() > n) {
+            return false;
+        }
+        return true;
     }
 
 
