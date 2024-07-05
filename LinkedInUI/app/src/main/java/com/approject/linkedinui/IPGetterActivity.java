@@ -42,7 +42,7 @@ public class IPGetterActivity extends AppCompatActivity {
 
                 // Validation
                 if (serverIp.isEmpty()) {
-                    Toast.makeText(IPGetterActivity.this, "Please enter the server IP", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(IPGetterActivity.this, "", Toast.LENGTH_SHORT).show();
                     return;
                 }
 

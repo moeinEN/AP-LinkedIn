@@ -24,7 +24,7 @@ import static Controller.FileController.writeResponseBodyToDisk;
 public class RetrofitBuilder implements NetworkRequest{
     private static String BASE_URL;
     private Retrofit retrofit;
-
+    public static RetrofitBuilder clientInterface;
     public RetrofitBuilder(String urlOrIP) {
         BASE_URL = urlOrIP;
         retrofit = retrofitBuilder();
