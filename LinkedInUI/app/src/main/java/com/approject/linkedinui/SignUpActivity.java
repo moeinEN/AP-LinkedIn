@@ -85,13 +85,16 @@ public class SignUpActivity extends AppCompatActivity {
 
                 RegisterCredentials registerCredentials = new RegisterCredentials(email, password, confirmPassword, username);
 //                Messages signupResp = RetrofitBuilder.clientInterface.syncCallSignUp(registerCredentials);
-
+                //TODO show dialog box while waiting for response and only change activity if successful
                 RetrofitBuilder.clientInterface.asyncCallSignUp(registerCredentials, new SignUpCallback() {
                     @Override
                     public void onSuccess(Messages message) {
                         System.out.println("######" + message + "#####");
                         if (message.equals(Messages.SUCCESS)){
                             runOnUiThread(() -> Toast.makeText(SignUpActivity.this, R.string.signup_success_message, Toast.LENGTH_SHORT).show());
+                            Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
+                            startActivity(intent);
+                            finish();
                         }
                         else if (message.equals(Messages.INVALID_EMAIL)) {
                             runOnUiThread(() -> Toast.makeText(SignUpActivity.this, R.string.signup_error_email_invalid, Toast.LENGTH_SHORT).show());
@@ -116,6 +119,7 @@ public class SignUpActivity extends AppCompatActivity {
                         }  else {
                             runOnUiThread(() -> Toast.makeText(SignUpActivity.this, R.string.login_error_network, Toast.LENGTH_SHORT).show());
                         }
+
                     }
 
                     @Override
@@ -123,10 +127,6 @@ public class SignUpActivity extends AppCompatActivity {
                         runOnUiThread(() -> Toast.makeText(SignUpActivity.this, R.string.internal_error, Toast.LENGTH_SHORT).show());
                     }
                 });
-
-                Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
-                startActivity(intent);
-                finish();
             }
         });
 
