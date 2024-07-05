@@ -14,6 +14,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -817,6 +818,51 @@ public class RequestHandler {
         } else {
             exchange.sendResponseHeaders(405, -1); // 405 method not-allowed
             return;
+        }
+    }
+    public static void getUserProfileId(HttpExchange exchange) throws IOException, SQLException {
+        if ("POST".equals(exchange.getRequestMethod())) {
+            byte[] response;
+            int responseCode;
+
+            Headers requestHeaders = exchange.getRequestHeaders();
+            int userId = JwtHandler.validateSessionToken(requestHeaders);
+            if (userId == -1) {
+                response = UNAUTHORIZED.toByte("UTF-8");
+                responseCode = UNAUTHORIZED.getStatusCode();
+            } else {
+                try (InputStream requestBody = exchange.getRequestBody();
+                     InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
+                    Gson gson = new Gson();
+                    Integer profileId = null;
+                    try {
+                        profileId = DatabaseQueryController.getProfileIdFromUserId(userId);
+                        String jsonResponse = gson.toJson(profileId);
+                        response = jsonResponse.getBytes("UTF-8");
+                        responseCode = SUCCESS.getStatusCode();
+                    } catch (SQLException e) {
+                        response = INTERNAL_ERROR.toByte("UTF-8");
+                        responseCode = INTERNAL_ERROR.getStatusCode();
+                    } catch (IllegalArgumentException e) {
+                        response = BAD_REQUEST.toByte("UTF-8");
+                        responseCode = BAD_REQUEST.getStatusCode();
+                    }
+                } catch (IOException e) {
+                    response = BAD_REQUEST.toByte("UTF-8");
+                    responseCode = BAD_REQUEST.getStatusCode();
+                }
+            }
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(responseCode, response.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(response);
+            }
+        } else {
+            byte[] response = METHOD_NOT_ALLOWED.toByte("UTF-8");
+            exchange.sendResponseHeaders(METHOD_NOT_ALLOWED.getStatusCode(), response.length); // 405 Method Not Allowed
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(response);
+            }
         }
     }
 }

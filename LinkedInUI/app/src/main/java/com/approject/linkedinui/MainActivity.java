@@ -19,6 +19,7 @@ import androidx.navigation.ui.NavigationUI;
 import com.approject.linkedinui.databinding.ActivityMainBinding;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import Controller.CallBack.ProfileIdCallback;
 import Controller.RetrofitBuilder;
 import Model.Cookies;
 import Model.Messages;

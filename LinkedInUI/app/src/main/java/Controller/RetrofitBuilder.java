@@ -455,4 +455,35 @@ public class RetrofitBuilder {
             return null;
         }
     }
+
+    public void asyncGetUserProfileId(ProfileIdCallback callback) {
+        UserService service = retrofit.create(UserService.class);
+        Call<ResponseBody> callAsync = service.getUserProfile(Cookies.getSessionToken());
+
+        callAsync.enqueue(new retrofit2.Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    try {
+                        String responseBody = response.body().string();
+                        Gson gson = new Gson();
+                        JsonObject jsonObject = gson.fromJson(responseBody, JsonObject.class);
+                        int profileId = jsonObject.get("profileId").getAsInt();
+                        callback.onSuccess(profileId);
+                    } catch (IOException e) {
+                        callback.onError("Error parsing response: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                } else {
+                    callback.onError("Request failed. Code: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                callback.onError("Request failed: " + t.getMessage());
+                t.printStackTrace();
+            }
+        });
+    }
 }

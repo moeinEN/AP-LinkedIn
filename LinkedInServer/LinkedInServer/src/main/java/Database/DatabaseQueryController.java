@@ -1503,6 +1503,22 @@ public class DatabaseQueryController {
         }
         return 0;
     }
+    public static int getProfileIdFromUserId(int userId) throws SQLException {
+        String sql = "SELECT * FROM Profile WHERE userId = ?";
+        try (Connection conn = DbController.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, userId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("id");
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+        return 0;
+    }
     public static Feed getFeed(int userId) throws SQLException {
         String sql = "SELECT * FROM POST WHERE userId = ?";
         Connection conn = DbController.getConnection();

@@ -78,4 +78,7 @@ public interface UserService {
 
     @GET("/getWatchList")
     Call<ResponseBody> getWatchList(@Header("sessionToken") String sessionToken);
+
+    @GET("/userProfile")
+    Call<ResponseBody> getUserProfile(@Header("sessionToken") String sessionToken);
 }
