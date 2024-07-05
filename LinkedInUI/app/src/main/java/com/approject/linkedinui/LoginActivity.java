@@ -84,6 +84,7 @@ public class LoginActivity extends AppCompatActivity {
                         });
                         getSharedPreferences(USER_DATA, MODE_PRIVATE).edit().putString(TOKEN, Cookies.getSessionToken()).commit();
                         System.out.println("TOKEN:{" + Cookies.getSessionToken() + "}");
+
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                         startActivity(intent);
                         finish();

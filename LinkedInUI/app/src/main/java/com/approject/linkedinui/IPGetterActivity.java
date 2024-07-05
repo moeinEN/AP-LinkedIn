@@ -14,11 +14,6 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
-import kotlin.jvm.internal.MagicApiIntrinsics;
 
 public class IPGetterActivity extends AppCompatActivity {
 
@@ -33,7 +28,7 @@ public class IPGetterActivity extends AppCompatActivity {
 //            return insets;
 //        });
         EditText serverIpEditText = findViewById(R.id.server_ip_edit_text);
-        Button submitButton = findViewById(R.id.submit_button);
+        Button submitButton = findViewById(R.id.submit_button1);
 
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override

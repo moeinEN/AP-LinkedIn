@@ -36,13 +36,13 @@
             android:layout_marginBottom="24dp"
             android:hint="@string/server_ip_hint"
             android:inputType="text"
-            app:layout_constraintBottom_toTopOf="@+id/submit_button"
+            app:layout_constraintBottom_toTopOf="@+id/submit_button1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.491"
             app:layout_constraintStart_toStartOf="parent" />
 
         <Button
-            android:id="@+id/submit_button"
+            android:id="@+id/submit_button1"
             android:layout_width="316dp"
             android:layout_height="55dp"
             android:layout_marginBottom="4dp"

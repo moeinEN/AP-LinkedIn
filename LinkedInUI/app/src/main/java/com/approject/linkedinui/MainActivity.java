@@ -61,10 +61,17 @@ public class MainActivity extends AppCompatActivity {
         RetrofitBuilder clientInterface = new RetrofitBuilder("http://" + serverIP + ":8080");
         RetrofitBuilder.clientInterface = clientInterface;
         String token = userData.getString(TOKEN, "");
-        System.out.println("###"+token+"###");
+        //System.out.println("###"+token+"###");
         Cookies.setSessionToken(token);
         if(token.equals("")){// || !clientInterface.validateToken().getMessage().equals(Messages.SUCCESS)){
             Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+        }
+        int profileId = userData.getInt(PROFILE_ID, 0);
+        Cookies.setProfileId(profileId);
+        if(profileId == 0) {
+            Intent intent = new Intent(this, CreateProfileActivity.class);
             startActivity(intent);
             finish();
         }
