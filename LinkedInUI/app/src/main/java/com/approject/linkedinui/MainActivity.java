@@ -6,31 +6,40 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.approject.linkedinui.databinding.ActivityMainBinding;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
 
-import java.util.TimeZone;
+import java.util.ArrayList;
 
+import Controller.*;
+import Controller.CallBack.WatchListCallback;
 import Controller.CallBack.WatchProfileCallback;
-import Controller.RetrofitBuilder;
-import Model.Cookies;
+import Model.*;
 import Model.Requests.WatchProfileRequest;
+import Model.Response.WatchPostResponse;
 import Model.Response.WatchProfileResponse;
 
-public class MainActivity extends AppCompatActivity {
+
+public class MainActivity extends AppCompatActivity implements OnItemClickListener{
 
     private ActivityMainBinding binding;
     private SharedPreferences userData;
     private String serverIP;
     private ProgressDialog progressDialog;
+    private ProgressBar progressBar;
+    private ArrayList<Post> FeedModalArrayList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,8 +98,14 @@ public class MainActivity extends AppCompatActivity {
                     if (!isFinishing()) {
                         Toast.makeText(MainActivity.this, "Failed to fetch profile: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                     }
-                });            }
+                });}
         });
+
+
+        progressBar = findViewById(R.id.idLoadingPB);
+
+        // calling method to load data in recycler view.
+        getFeeds();
 
 
 
@@ -100,5 +115,67 @@ public class MainActivity extends AppCompatActivity {
 //        progressDialog.dismiss();
 //        Toast.makeText(MainActivity.this,  serverIP, Toast.LENGTH_SHORT).show();
 
+    }
+
+    private void getFeeds() {
+        progressBar.setVisibility(View.GONE);
+        FeedModalArrayList = new ArrayList<>();
+
+        RetrofitBuilder.clientInterface.asyncCallDownload("kir.jpg");
+
+        RetrofitBuilder.clientInterface.asyncGetWatchList(new WatchListCallback() {
+            @Override
+            public void onSuccess(WatchPostResponse watchPostResponse) {
+                if (watchPostResponse.getPosts().size() != 0) {
+                    FeedModalArrayList.addAll(watchPostResponse.getPosts());
+                    System.out.println(watchPostResponse.getPosts().toString());
+
+                    // Set up the RecyclerView with the posts
+                    FeedRVAdapter adapter = new FeedRVAdapter(FeedModalArrayList, MainActivity.this, MainActivity.this);
+                    RecyclerView instRV = findViewById(R.id.idRVInstaFeeds);
+                    LinearLayoutManager linearLayoutManager = new LinearLayoutManager(MainActivity.this, RecyclerView.VERTICAL, false);
+                    instRV.setLayoutManager(linearLayoutManager);
+                    instRV.setAdapter(adapter);
+                } else {
+                    FeedEmptyAdapter adapter = new FeedEmptyAdapter(MainActivity.this);
+                    RecyclerView instRV = findViewById(R.id.idRVInstaFeeds);
+                    LinearLayoutManager linearLayoutManager = new LinearLayoutManager(MainActivity.this, RecyclerView.VERTICAL, false);
+                    instRV.setLayoutManager(linearLayoutManager);
+                    instRV.setAdapter(adapter);
+                }
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                System.out.println(errorMessage);
+                Toast.makeText(MainActivity.this, "Fail to get data with error " + errorMessage, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    @Override
+    public void onAuthorImageClick(int position) {
+        Post clickedPost = FeedModalArrayList.get(position);
+        Toast.makeText(this, "Author image clicked: " + clickedPost.getMiniProfile().getFirstName(), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onPostImageClick(int position) {
+        Post clickedPost = FeedModalArrayList.get(position);
+        Toast.makeText(this, "Post image clicked", Toast.LENGTH_SHORT).show();
+        // You can start a new activity or perform other actions here
+    }
+
+    @Override
+    public void onAuthorNameClick(int position) {
+        Post clickedPost = FeedModalArrayList.get(position);
+        Toast.makeText(this, "Author name clicked: " + clickedPost.getMiniProfile().getFirstName(), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onLikeImageClick(int position) {
+        Post clickedPost = FeedModalArrayList.get(position);
+        Toast.makeText(this, "Liked post: " + clickedPost.getText(), Toast.LENGTH_SHORT).show();
+        // Handle the like action here, such as updating the server or UI
     }
 }

@@ -447,24 +447,34 @@ Gson gson = new GsonBuilder().setDateFormat("E MMM dd HH:mm:ss z yyyy").create()
         }
     }
 
-    public WatchPostResponse getWatchList() {
+    public void asyncGetWatchList(WatchListCallback callback) {
         UserService service = retrofit.create(UserService.class);
         Call<ResponseBody> callGetWatchList = service.getWatchList(Cookies.getSessionToken());
-        WatchPostResponse watchPostResponse;
-        try {
-            Response<ResponseBody> response = callGetWatchList.execute();
-            if (response.isSuccessful() && response.body() != null) {
-                byte[] responseBodeBytes = response.body().bytes();
-Gson gson = new GsonBuilder().setDateFormat("E MMM dd HH:mm:ss z yyyy").create();                watchPostResponse = gson.fromJson(new String(responseBodeBytes), WatchPostResponse.class);
 
-                return watchPostResponse;
-            } else {
-                return null;
+        callGetWatchList.enqueue(new retrofit2.Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    try {
+                        byte[] responseBodyBytes = response.body().bytes();
+                        Gson gson = new Gson();
+                        WatchPostResponse watchPostResponse = gson.fromJson(new String(responseBodyBytes), WatchPostResponse.class);
+                        callback.onSuccess(watchPostResponse);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        callback.onFailure("Internal error: " + e.getMessage());
+                    }
+                } else {
+                    callback.onFailure("Request failed. Code: " + response.code());
+                }
             }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return null;
-        }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                t.printStackTrace();
+                callback.onFailure("Request failed: " + t.getMessage());
+            }
+        });
     }
 
     public void asyncGetUserProfileId(ProfileIdCallback callback) {
