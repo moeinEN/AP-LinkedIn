@@ -18,4 +18,13 @@ public enum JobStatus {
     private JobStatus(String value) {
         this.value = value;
     }
+
+    public static JobStatus fromValue(String value) {
+        for (JobStatus status : JobStatus.values()) {
+            if (status.value.equalsIgnoreCase(value)) {
+                return status;
+            }
+        }
+        return JobStatus.NULL; // Default case if the value does not match any enum constant
+    }
 }

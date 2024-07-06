@@ -62,4 +62,13 @@ public enum EducationalSkills {
     public String getValue() {
         return value;
     }
+
+    public static EducationalSkills fromValue(String value) {
+        for (EducationalSkills status : EducationalSkills.values()) {
+            if (status.value.equalsIgnoreCase(value)) {
+                return status;
+            }
+        }
+        return EducationalSkills.EMPTY; // Default case if the value does not match any enum constant
+    }
 }

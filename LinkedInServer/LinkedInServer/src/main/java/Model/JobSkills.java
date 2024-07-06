@@ -71,4 +71,13 @@ public enum JobSkills {
     public String getValue() {
         return value;
     }
+
+    public static JobSkills fromValue(String value) {
+        for (JobSkills status : JobSkills.values()) {
+            if (status.value.equalsIgnoreCase(value)) {
+                return status;
+            }
+        }
+        return JobSkills.EMPTY; // Default case if the value does not match any enum constant
+    }
 }
