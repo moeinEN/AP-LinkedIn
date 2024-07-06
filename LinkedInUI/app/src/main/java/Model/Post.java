@@ -17,4 +17,5 @@ public class Post {
     private String mediaName;
     private int identification;
     List<String> hashtags = new ArrayList<>();
+    private MiniProfile miniProfile;
 }

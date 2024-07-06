@@ -51,36 +51,37 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
         NavigationUI.setupWithNavController(binding.navView, navController);
 
-        userData = getSharedPreferences(USER_DATA, MODE_PRIVATE);
 
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        userData = getSharedPreferences(USER_DATA, MODE_PRIVATE);
         serverIP = userData.getString(IP_ADDRESS, "");
         //if(serverIP.isEmpty()) {
         if(serverIP.equals("")){
             Intent intent = new Intent(this, IPGetterActivity.class);
             startActivity(intent);
         }
-        //Toast.makeText(this, serverIP, Toast.LENGTH_LONG).show();
-        RetrofitBuilder clientInterface = new RetrofitBuilder("http://" + serverIP + ":8080");
-        RetrofitBuilder.clientInterface = clientInterface;
+        Toast.makeText(this, serverIP, Toast.LENGTH_LONG).show();
+        RetrofitBuilder.clientInterface = new RetrofitBuilder("http://" + serverIP + ":8080");
         String token = userData.getString(TOKEN, "");
-        //System.out.println("###"+token+"###");
+        System.out.println("###"+token+"###");
         Cookies.setSessionToken(token);
         if(token.equals("")){// || !clientInterface.validateToken().getMessage().equals(Messages.SUCCESS)){
-            Intent intent = new Intent(this, LoginActivity.class);
+            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(intent);
+            finish();
         }
         int profileId = userData.getInt(PROFILE_ID, 0);
         Cookies.setProfileId(profileId);
         if(profileId == 0) {
             Intent intent = new Intent(this, CreateProfileActivity.class);
             startActivity(intent);
+            finish();
         }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
         RetrofitBuilder.clientInterface.asyncWatchProfileRequest(new WatchProfileRequest(userData.getInt(PROFILE_ID, 0)), new WatchProfileCallback() {
             @Override
             public void onSuccess(WatchProfileResponse response) {

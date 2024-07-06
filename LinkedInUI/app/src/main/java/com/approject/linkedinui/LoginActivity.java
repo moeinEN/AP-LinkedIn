@@ -1,5 +1,6 @@
 package com.approject.linkedinui;
 
+import static com.approject.linkedinui.runtimeconstants.SharedPreferencesNames.IP_ADDRESS;
 import static com.approject.linkedinui.runtimeconstants.SharedPreferencesNames.TOKEN;
 import static com.approject.linkedinui.runtimeconstants.SharedPreferencesNames.USER_DATA;
 import static Controller.InputStringValidator.validateEmail;
@@ -7,6 +8,7 @@ import static Controller.InputStringValidator.validatePassword;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -31,6 +33,8 @@ public class LoginActivity extends AppCompatActivity {
     EditText emailText, passwordText;
     Button loginButton, signUpButton;
     ProgressDialog progressDialog;
+    private SharedPreferences userData;
+    private String serverIP;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +78,8 @@ public class LoginActivity extends AppCompatActivity {
                 progressDialog.setMessage("Loading...");
                 progressDialog.setCancelable(false); // Prevent user from dismissing it
                 progressDialog.show();
+                userData = getSharedPreferences(USER_DATA, MODE_PRIVATE);
+                serverIP = userData.getString(IP_ADDRESS, "");
                RetrofitBuilder.clientInterface.asyncCallLogin(loginCredentials, new LoginCallback() {
                     @Override
                     public void onSuccess(Messages message) {
@@ -84,7 +90,8 @@ public class LoginActivity extends AppCompatActivity {
                         });
                         getSharedPreferences(USER_DATA, MODE_PRIVATE).edit().putString(TOKEN, Cookies.getSessionToken()).commit();
                         System.out.println("TOKEN:{" + Cookies.getSessionToken() + "}");
-
+                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                        startActivity(intent);
                         finish();
                     }
 
