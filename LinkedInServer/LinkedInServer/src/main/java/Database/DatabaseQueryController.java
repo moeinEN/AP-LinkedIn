@@ -1658,10 +1658,10 @@ public class DatabaseQueryController {
 
     public static java.util.Date convertFrom(String dateString) throws ParseException {
         // Define the date format
-        SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
+        SimpleDateFormat sdf = new SimpleDateFormat("E MMM dd HH:mm:ss z yyyy");
         java.util.Date date;
         if (dateString == null)
-            date = new java.util.Date();
+            date = sdf.parse("Sun Dec 01 00:00:00 IRST 2024");
         else
             date = sdf.parse(dateString);
 

@@ -40,8 +40,7 @@ public class RetrofitBuilder {
 
         OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
 
-        Gson gson = new GsonBuilder()
-                .create();
+        Gson gson = new GsonBuilder().setDateFormat("MMM d, yyyy, hh:mm:ss a").create();
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create(gson))
@@ -131,8 +130,7 @@ public class RetrofitBuilder {
                 if (response.isSuccessful() && response.body() != null) {
                     try {
                         byte[] responseBodyBytes = response.body().bytes();
-                        Gson gson = new Gson();
-                        String responseString = gson.fromJson(new String(responseBodyBytes), String.class);
+        Gson gson = new GsonBuilder().setDateFormat("E MMM dd HH:mm:ss z yyyy").create();                        String responseString = gson.fromJson(new String(responseBodyBytes), String.class);
                         Cookies.setSessionToken(responseString);
                         callback.onSuccess(Messages.USER_LOGGED_IN_SUCCESSFULLY);
                     } catch (IOException e) {
@@ -160,7 +158,7 @@ public class RetrofitBuilder {
             Response<ResponseBody> response = callValidate.execute();
             if (response.isSuccessful() && response.body() != null) {
                 byte[] responseBodyBytes = response.body().bytes();
-                Gson gson = new Gson();
+                Gson gson = new GsonBuilder().setDateFormat("E MMM dd HH:mm:ss z yyyy").create();
                 serverResponse = gson.fromJson(new String(responseBodyBytes), Messages.class);
                 return serverResponse;
             } else {
@@ -182,8 +180,7 @@ public class RetrofitBuilder {
                 if (response.isSuccessful() && response.body() != null) {
                     try {
                         byte[] responseBodyBytes = response.body().bytes();
-                        Gson gson = new Gson();
-                        Messages serverResponse = gson.fromJson(new String(responseBodyBytes), Messages.class);
+Gson gson = new GsonBuilder().setDateFormat("MMM d, yyyy, hh:mm:ss a").create();                        Messages serverResponse = gson.fromJson(new String(responseBodyBytes), Messages.class);
                         callback.onSuccess(serverResponse);
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -209,7 +206,7 @@ public class RetrofitBuilder {
         try {
             Response<ResponseBody> response = callLike.execute();
             byte[] responseBodeBytes = response.body().bytes();
-            Gson gson = new Gson();
+Gson gson = new GsonBuilder().setDateFormat("EEE MMM dd HH:mm:ss zzz yyyy").create();
             ServerResponse = gson.fromJson(new String(responseBodeBytes), Messages.class);
 
             return ServerResponse;
@@ -226,7 +223,7 @@ public class RetrofitBuilder {
         try {
             Response<ResponseBody> response = callPost.execute();
             byte[] responseBodeBytes = response.body().bytes();
-            Gson gson = new Gson();
+Gson gson = new GsonBuilder().setDateFormat("EEE MMM dd HH:mm:ss zzz yyyy").create();
             ServerResponse = gson.fromJson(new String(responseBodeBytes), Messages.class);
 
             return ServerResponse;
@@ -243,7 +240,7 @@ public class RetrofitBuilder {
         try {
             Response<ResponseBody> response = callLike.execute();
             byte[] responseBodeBytes = response.body().bytes();
-            Gson gson = new Gson();
+Gson gson = new GsonBuilder().setDateFormat("EEE MMM dd HH:mm:ss zzz yyyy").create();
             ServerResponse = gson.fromJson(new String(responseBodeBytes), Messages.class);
 
             return ServerResponse;
@@ -260,7 +257,7 @@ public class RetrofitBuilder {
         try {
             Response<ResponseBody> response = callConnect.execute();
             byte[] responseBodyBytes = response.body().bytes();
-            Gson gson = new Gson();
+Gson gson = new GsonBuilder().setDateFormat("EEE MMM dd HH:mm:ss zzz yyyy").create();
             serverResponse = gson.fromJson(new String(responseBodyBytes), Messages.class);
 
             return serverResponse;
@@ -333,7 +330,7 @@ public class RetrofitBuilder {
         try {
             Response<ResponseBody> response = callAcceptConnection.execute();
             byte[] responseBodeBytes = response.body().bytes();
-            Gson gson = new Gson();
+Gson gson = new GsonBuilder().setDateFormat("EEE MMM dd HH:mm:ss zzz yyyy").create();
             ServerResponse = gson.fromJson(new String(responseBodeBytes), Messages.class);
 
             return ServerResponse;
@@ -353,8 +350,7 @@ public class RetrofitBuilder {
                 if (response.isSuccessful() && response.body() != null) {
                     try {
                         byte[] responseBodyBytes = response.body().bytes();
-                        Gson gson = new Gson();
-                        WatchProfileResponse serverResponse = gson.fromJson(new String(responseBodyBytes), WatchProfileResponse.class);
+Gson gson = new GsonBuilder().setDateFormat("MMM d, yyyy, hh:mm:ss a").create();                        WatchProfileResponse serverResponse = gson.fromJson(new String(responseBodyBytes), WatchProfileResponse.class);
                         callback.onSuccess(serverResponse);
                     } catch (IOException e) {
                         callback.onFailure(e);
@@ -379,8 +375,7 @@ public class RetrofitBuilder {
             Response<ResponseBody> response = callSearchPost.execute();
             if (response.isSuccessful() && response.body() != null) {
                 byte[] responseBodeBytes = response.body().bytes();
-                Gson gson = new Gson();
-                ServerResponse = gson.fromJson(new String(responseBodeBytes), WatchPostSearchResults.class);
+Gson gson = new GsonBuilder().setDateFormat("E MMM dd HH:mm:ss z yyyy").create();                ServerResponse = gson.fromJson(new String(responseBodeBytes), WatchPostSearchResults.class);
 
                 return ServerResponse;
             } else {
@@ -400,8 +395,7 @@ public class RetrofitBuilder {
             Response<ResponseBody> response = callWatchProfileSearch.execute();
             if (response.isSuccessful() && response.body() != null) {
                 byte[] responseBodeBytes = response.body().bytes();
-                Gson gson = new Gson();
-                ServerResponse = gson.fromJson(new String(responseBodeBytes), WatchProfileSearchResults.class);
+Gson gson = new GsonBuilder().setDateFormat("E MMM dd HH:mm:ss z yyyy").create();                ServerResponse = gson.fromJson(new String(responseBodeBytes), WatchProfileSearchResults.class);
 
                 return ServerResponse;
             } else {
@@ -421,8 +415,7 @@ public class RetrofitBuilder {
             Response<ResponseBody> response = callWatchConnectionList.execute();
             if (response.isSuccessful() && response.body() != null) {
                 byte[] responseBodeBytes = response.body().bytes();
-                Gson gson = new Gson();
-                ServerResponse = gson.fromJson(new String(responseBodeBytes), WatchConnectionListResponse.class);
+Gson gson = new GsonBuilder().setDateFormat("E MMM dd HH:mm:ss z yyyy").create();                ServerResponse = gson.fromJson(new String(responseBodeBytes), WatchConnectionListResponse.class);
 
                 return ServerResponse;
             } else {
@@ -442,8 +435,7 @@ public class RetrofitBuilder {
             Response<ResponseBody> response = callWatchConnectionPendingLists.execute();
             if (response.isSuccessful() && response.body() != null) {
                 byte[] responseBodeBytes = response.body().bytes();
-                Gson gson = new Gson();
-                ServerResponse = gson.fromJson(new String(responseBodeBytes), WatchConnectionPendingLists.class);
+Gson gson = new GsonBuilder().setDateFormat("E MMM dd HH:mm:ss z yyyy").create();                ServerResponse = gson.fromJson(new String(responseBodeBytes), WatchConnectionPendingLists.class);
 
                 return ServerResponse;
             } else {
@@ -463,8 +455,7 @@ public class RetrofitBuilder {
             Response<ResponseBody> response = callGetWatchList.execute();
             if (response.isSuccessful() && response.body() != null) {
                 byte[] responseBodeBytes = response.body().bytes();
-                Gson gson = new Gson();
-                watchPostResponse = gson.fromJson(new String(responseBodeBytes), WatchPostResponse.class);
+Gson gson = new GsonBuilder().setDateFormat("E MMM dd HH:mm:ss z yyyy").create();                watchPostResponse = gson.fromJson(new String(responseBodeBytes), WatchPostResponse.class);
 
                 return watchPostResponse;
             } else {
@@ -486,8 +477,7 @@ public class RetrofitBuilder {
                 if (response.isSuccessful() && response.body() != null) {
                     try {
                         String responseBody = response.body().string();
-                        Gson gson = new Gson();
-                        JsonObject jsonObject = gson.fromJson(responseBody, JsonObject.class);
+        Gson gson = new GsonBuilder().setDateFormat("E MMM dd HH:mm:ss z yyyy").create();                        JsonObject jsonObject = gson.fromJson(responseBody, JsonObject.class);
                         int profileId = jsonObject.get("profileId").getAsInt();
                         callback.onSuccess(profileId);
                     } catch (IOException e) {
