@@ -51,8 +51,6 @@ public class CreateProfileActivity extends AppCompatActivity {
                 // for not breaking the app
                 Cookies.setProfileId(1);
                 getSharedPreferences(USER_DATA, MODE_PRIVATE).edit().putInt(PROFILE_ID, Cookies.getProfileId()).commit();
-                Intent intent = new Intent(CreateProfileActivity.this, MainActivity.class);
-                startActivity(intent);
                 finish();
 
 

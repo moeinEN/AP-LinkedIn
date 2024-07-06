@@ -6,6 +6,7 @@ import Model.*;
 import Model.Requests.*;
 import Model.Response.WatchProfileSearchResults;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import org.apache.commons.fileupload.FileItem;
@@ -86,7 +87,7 @@ public class RequestHandler {
             RegisterCredentials registerCredentials = null;
             try (InputStream requestBody = exchange.getRequestBody();
                  InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
-                Gson gson = new Gson();
+                Gson gson = new GsonBuilder().setDateFormat("MMM dd, yyyy HH:mm:ss").create();
                 registerCredentials = gson.fromJson(reader, RegisterCredentials.class);
 
             } catch (Exception e) {
@@ -122,7 +123,7 @@ public class RequestHandler {
             LoginCredentials recievedLoginCredentials = null;
             try (InputStream requestBody = exchange.getRequestBody();
                  InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
-                Gson gson = new Gson();
+                Gson gson = new GsonBuilder().setDateFormat("MMM dd, yyyy HH:mm:ss").create();
                 recievedLoginCredentials = gson.fromJson(reader, LoginCredentials.class);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -171,7 +172,7 @@ public class RequestHandler {
             else {
                 try (InputStream requestBody = exchange.getRequestBody();
                      InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
-                    Gson gson = new Gson();
+                    Gson gson = new GsonBuilder().setDateFormat("MMM dd, yyyy HH:mm:ss").create();
                     Profile recievedProfile = null;
                     try {
                         recievedProfile = gson.fromJson(reader, Profile.class);
@@ -223,7 +224,7 @@ public class RequestHandler {
             else {
                 try (InputStream requestBody = exchange.getRequestBody();
                      InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
-                    Gson gson = new Gson();
+                    Gson gson = new GsonBuilder().setDateFormat("MMM dd, yyyy HH:mm:ss").create();
                     LikeRequest likeRequest = null;
                     try {
                         likeRequest = gson.fromJson(reader, LikeRequest.class);
@@ -275,7 +276,7 @@ public class RequestHandler {
             else {
                 try (InputStream requestBody = exchange.getRequestBody();
                      InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
-                    Gson gson = new Gson();
+                    Gson gson = new GsonBuilder().setDateFormat("MMM dd, yyyy HH:mm:ss").create();
                     CommentRequest commentRequest = null;
                     try {
                         commentRequest = gson.fromJson(reader, CommentRequest.class);
@@ -327,7 +328,7 @@ public class RequestHandler {
             else {
                 try (InputStream requestBody = exchange.getRequestBody();
                      InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
-                    Gson gson = new Gson();
+                    Gson gson = new GsonBuilder().setDateFormat("MMM dd, yyyy HH:mm:ss").create();
                     ConnectRequest connectRequest = null;
                     try {
                         connectRequest = gson.fromJson(reader, ConnectRequest.class);
@@ -446,7 +447,7 @@ public class RequestHandler {
             else {
                 try (InputStream requestBody = exchange.getRequestBody();
                      InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
-                    Gson gson = new Gson();
+                    Gson gson = new GsonBuilder().setDateFormat("MMM dd, yyyy HH:mm:ss").create();
                     AcceptConnection acceptConnection = null;
                     try {
                         acceptConnection = gson.fromJson(reader, AcceptConnection.class);
@@ -498,7 +499,7 @@ public class RequestHandler {
             else {
                 try (InputStream requestBody = exchange.getRequestBody();
                      InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
-                    Gson gson = new Gson();
+                    Gson gson = new GsonBuilder().setDateFormat("MMM dd, yyyy HH:mm:ss").create();
                     WatchProfileRequest watchProfileRequest = null;
                     try {
                         watchProfileRequest = gson.fromJson(reader, WatchProfileRequest.class);
@@ -541,7 +542,7 @@ public class RequestHandler {
             else {
                 try (InputStream requestBody = exchange.getRequestBody();
                      InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
-                    Gson gson = new Gson();
+                    Gson gson = new GsonBuilder().setDateFormat("MMM dd, yyyy HH:mm:ss").create();
                     SearchPostsRequest searchPostsRequest = null;
                     try {
                         searchPostsRequest = gson.fromJson(reader, SearchPostsRequest.class);
@@ -584,7 +585,7 @@ public class RequestHandler {
             else {
                 try (InputStream requestBody = exchange.getRequestBody();
                      InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
-                    Gson gson = new Gson();
+                    Gson gson = new GsonBuilder().setDateFormat("MMM dd, yyyy HH:mm:ss").create();
                     SearchProfileRequest searchProfileRequest = null;
                     try {
                         searchProfileRequest = gson.fromJson(reader, SearchProfileRequest.class);
@@ -627,7 +628,7 @@ public class RequestHandler {
             else {
                 try (InputStream requestBody = exchange.getRequestBody();
                      InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
-                    Gson gson = new Gson();
+                    Gson gson = new GsonBuilder().setDateFormat("MMM dd, yyyy HH:mm:ss").create();
                     try {
                         try {
                             response = DatabaseQueryController.selectConnectionList(userId).toByte("UTF-8");
@@ -668,7 +669,7 @@ public class RequestHandler {
             else {
                 try (InputStream requestBody = exchange.getRequestBody();
                      InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
-                    Gson gson = new Gson();
+                    Gson gson = new GsonBuilder().setDateFormat("MMM dd, yyyy HH:mm:ss").create();
                     //WatchPendingConnectionListRequest watchPendingConnectionListRequest = null;
                     try {
                         //watchPendingConnectionListRequest = gson.fromJson(reader, WatchPendingConnectionListRequest.class);
@@ -712,7 +713,7 @@ public class RequestHandler {
             else {
                 try (InputStream requestBody = exchange.getRequestBody();
                      InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
-                    Gson gson = new Gson();
+                    Gson gson = new GsonBuilder().setDateFormat("MMM dd, yyyy HH:mm:ss").create();
                     Post post = null;
                     try {
                         post = gson.fromJson(reader, Post.class);
@@ -783,13 +784,14 @@ public class RequestHandler {
         }
     }
     public static void getWatchList(HttpExchange exchange) throws IOException, SQLException {
-        if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) { // make other method equals check to equalsIgonreCase
+        if ("GET".equalsIgnoreCase(exchange.getRequestMethod())) { // make other method equals check to equalsIgonreCase
             byte[] response;
             int responseCode;
 
             Headers requestHeaders = exchange.getRequestHeaders();
-            int userId = JwtHandler.validateSessionToken(requestHeaders);
-            if (userId == -1) {
+//            int userId = JwtHandler.validateSessionToken(requestHeaders);
+            int userId = 1;
+            if (userId == -1 && false) {
                 exchange.sendResponseHeaders(401, -1); // 401 unauthorized
                 return;
             } else {
@@ -833,7 +835,7 @@ public class RequestHandler {
             } else {
                 try (InputStream requestBody = exchange.getRequestBody();
                      InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
-                    Gson gson = new Gson();
+                    Gson gson = new GsonBuilder().setDateFormat("MMM dd, yyyy HH:mm:ss").create();
                     Integer profileId = null;
                     try {
                         profileId = DatabaseQueryController.getProfileIdFromUserId(userId);

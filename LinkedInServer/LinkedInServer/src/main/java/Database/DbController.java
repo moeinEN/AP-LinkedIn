@@ -14,6 +14,7 @@ public class DbController {
         try {
             Class.forName("org.sqlite.JDBC");
             db = DriverManager.getConnection("jdbc:sqlite:src/main/resources/BackEndDb.db");
+            db.setAutoCommit(false);
         } catch (Exception e) {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
         }

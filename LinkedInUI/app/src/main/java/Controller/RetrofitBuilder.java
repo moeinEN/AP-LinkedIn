@@ -343,25 +343,32 @@ public class RetrofitBuilder {
         }
     }
 
-    public WatchProfileResponse watchProfileRequest(WatchProfileRequest watchProfileRequest) {
+    public void asyncWatchProfileRequest(WatchProfileRequest watchProfileRequest, WatchProfileCallback callback) {
         UserService service = retrofit.create(UserService.class);
         Call<ResponseBody> callWatchProfile = service.watchProfile(watchProfileRequest, Cookies.getSessionToken());
-        WatchProfileResponse ServerResponse;
-        try {
-            Response<ResponseBody> response = callWatchProfile.execute();
-            if (response.isSuccessful() && response.body() != null) {
-                byte[] responseBodeBytes = response.body().bytes();
-                Gson gson = new Gson();
-                ServerResponse = gson.fromJson(new String(responseBodeBytes), WatchProfileResponse.class);
 
-                return ServerResponse;
-            } else {
-                return null;
+        callWatchProfile.enqueue(new retrofit2.Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    try {
+                        byte[] responseBodyBytes = response.body().bytes();
+                        Gson gson = new Gson();
+                        WatchProfileResponse serverResponse = gson.fromJson(new String(responseBodyBytes), WatchProfileResponse.class);
+                        callback.onSuccess(serverResponse);
+                    } catch (IOException e) {
+                        callback.onFailure(e);
+                    }
+                } else {
+                    callback.onFailure(new Exception("Response not successful or body is null"));
+                }
             }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return null;
-        }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                callback.onFailure(t);
+            }
+        });
     }
 
     public WatchPostSearchResults searchPostRequest(SearchPostsRequest searchPostsRequest) {

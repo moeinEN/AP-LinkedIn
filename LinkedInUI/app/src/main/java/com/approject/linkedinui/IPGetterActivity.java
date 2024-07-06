@@ -47,9 +47,6 @@ public class IPGetterActivity extends AppCompatActivity {
                 editor.putString(IP_ADDRESS, serverIp);
                 editor.apply();
 
-                // Handle after saving IP (e.g., close activity, navigate to another screen)
-                Intent intent = new Intent(IPGetterActivity.this, MainActivity.class);
-                startActivity(intent);
                 finish();
                  // Close this activity after saving
             }

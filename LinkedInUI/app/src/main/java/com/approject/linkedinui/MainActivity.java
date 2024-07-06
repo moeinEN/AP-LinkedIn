@@ -2,30 +2,26 @@ package com.approject.linkedinui;
 
 import static com.approject.linkedinui.runtimeconstants.SharedPreferencesNames.*;
 
-import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.approject.linkedinui.databinding.ActivityMainBinding;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.gson.Gson;
 
-import Controller.CallBack.ProfileCallback;
-import Controller.CallBack.ProfileIdCallback;
+import Controller.CallBack.WatchProfileCallback;
 import Controller.RetrofitBuilder;
 import Model.Cookies;
-import Model.Messages;
-import Model.Requests.CreateProfileRequest;
-import Model.Requests.LoginCredentials;
+import Model.Requests.WatchProfileRequest;
+import Model.Response.WatchProfileResponse;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -45,17 +41,12 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(binding.navView, navController);
 
         userData = getSharedPreferences(USER_DATA, MODE_PRIVATE);
-    }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
         serverIP = userData.getString(IP_ADDRESS, "");
         //if(serverIP.isEmpty()) {
         if(serverIP.equals("")){
             Intent intent = new Intent(this, IPGetterActivity.class);
             startActivity(intent);
-            finish();
         }
         //Toast.makeText(this, serverIP, Toast.LENGTH_LONG).show();
         RetrofitBuilder clientInterface = new RetrofitBuilder("http://" + serverIP + ":8080");
@@ -66,15 +57,40 @@ public class MainActivity extends AppCompatActivity {
         if(token.equals("")){// || !clientInterface.validateToken().getMessage().equals(Messages.SUCCESS)){
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
-            finish();
         }
         int profileId = userData.getInt(PROFILE_ID, 0);
         Cookies.setProfileId(profileId);
         if(profileId == 0) {
             Intent intent = new Intent(this, CreateProfileActivity.class);
             startActivity(intent);
-            finish();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        RetrofitBuilder.clientInterface.asyncWatchProfileRequest(new WatchProfileRequest(userData.getInt(PROFILE_ID, 0)), new WatchProfileCallback() {
+            @Override
+            public void onSuccess(WatchProfileResponse response) {
+                Gson gson = new Gson();
+                String profileJson = gson.toJson(response);
+
+                Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                intent.putExtra("profile", profileJson);
+                startActivity(intent);
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                runOnUiThread(() -> {
+                    if (!isFinishing()) {
+                        Toast.makeText(MainActivity.this, "Failed to fetch profile: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });            }
+        });
+
+
 
 //        progressDialog.show();
 //        LoginCredentials loginCredentials = new LoginCredentials("Goostavo", "tEST@123");

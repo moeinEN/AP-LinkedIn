@@ -88,4 +88,18 @@
     <string name="invalid_activities_description">Invalid description of activities</string>
     <string name="invalid_description">Invalid description</string>
     <string name="profile_saved">Profile saved successfully</string>
+
+    <string name="country">Country</string>
+    <string name="bio">A Geek.</string>
+    <string name="profile">Profile</string>
+    <string name="about">About</string>
+    <string name="user_information">User Information</string>
+    <string name="username_">Username</string>
+    <string name="city">City</string>
+    <string name="profession">Profession</string>
+    <string name="current_job">Current job</string>
+    <string name="institute_name">Current institute</string>
+    <string name="contact_info">Contact info</string>
+    <string name="job_status">Job status</string>
+    <string name="social_media">Social Media</string>
 </resources>
