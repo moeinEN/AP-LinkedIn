@@ -22,4 +22,5 @@ public class Post {
     private int identification;
     private MiniProfile miniProfile;
     List<String> hashtags = new ArrayList<>();
+    private MiniProfile miniProfile;
 }
