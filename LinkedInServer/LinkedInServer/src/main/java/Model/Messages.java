@@ -13,7 +13,7 @@ public enum Messages {
     CONFIRMATION_PASSWORD("Confirmation does not match the password!", 3),
     INVALID_EMAIL("email is invalid!", 4),
     EMAIL_EXISTS("email already exists!", 5),
-    INTERNAL_ERROR("Internal error!", 6),
+    INTERNAL_ERROR("Internal error!", 500),
     METHOD_NOT_ALLOWED("Method not allowed!", 405),
     INVALID_CREDENTIALS("Username or password is invalid!", 8),
     USER_LOGGED_IN_SUCCESSFULLY("User logged in successfully.", 9),

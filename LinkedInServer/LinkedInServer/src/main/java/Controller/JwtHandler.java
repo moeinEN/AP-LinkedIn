@@ -80,17 +80,22 @@ public class JwtHandler {
         return Messages.SUCCESS;
     }
 
-    public static int validateSessionToken(Headers requestHeaders) throws SQLException {
-        if (requestHeaders.containsKey("sessionToken")) {
-            List<String> sessionTokens = requestHeaders.get("sessionToken");
-            String sessionToken = sessionTokens.get(0);
-            if(JwtHandler.validateUserSession(sessionToken) == Messages.SUCCESS) {
-                return JwtHandler.getUserIdFromJwtToken(sessionToken);
-            }
-            else {
+    public static int validateSessionToken(Headers requestHeaders) {
+        try {
+            if (requestHeaders.containsKey("sessionToken")) {
+                List<String> sessionTokens = requestHeaders.get("sessionToken");
+                String sessionToken = sessionTokens.get(0);
+                if(JwtHandler.validateUserSession(sessionToken) == Messages.SUCCESS) {
+                    return JwtHandler.getUserIdFromJwtToken(sessionToken);
+                }
+                else {
+                    return -1;
+                }
+            } else {
                 return -1;
             }
-        } else {
+        }
+        catch (Exception e) {
             return -1;
         }
     }

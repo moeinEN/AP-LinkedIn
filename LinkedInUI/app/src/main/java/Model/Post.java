@@ -1,9 +1,13 @@
 package Model;
 
-import lombok.*;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
@@ -16,5 +20,6 @@ public class Post {
     private Comment comments;
     private String mediaName;
     private int identification;
+    private MiniProfile miniProfile;
     List<String> hashtags = new ArrayList<>();
 }

@@ -306,8 +306,9 @@ public class DatabaseQueryController {
                 int postId = rs.getInt("specifiedPostId");
                 watchList.add(getPostbyId(conn, postId));
                 removeFromWatchList(conn, postId);
+                conn.commit();
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         watchPostResponse.setPosts(watchList);

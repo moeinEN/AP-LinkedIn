@@ -6,6 +6,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -24,6 +25,7 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 
 import Controller.*;
+import Controller.CallBack.ValidateTokenCallback;
 import Controller.CallBack.WatchListCallback;
 import Controller.CallBack.WatchProfileCallback;
 import Model.*;
@@ -53,25 +55,38 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
         userData = getSharedPreferences(USER_DATA, MODE_PRIVATE);
 
-        serverIP = userData.getString(IP_ADDRESS, "");
-        //if(serverIP.isEmpty()) {
-        if(serverIP.equals("")){
-            Intent intent = new Intent(this, IPGetterActivity.class);
-            startActivity(intent);
-        }
-        //Toast.makeText(this, serverIP, Toast.LENGTH_LONG).show();
-        RetrofitBuilder clientInterface = new RetrofitBuilder("http://" + serverIP + ":8080");
-        RetrofitBuilder.clientInterface = clientInterface;
+//        serverIP = userData.getString(IP_ADDRESS, "");
+//        if(serverIP.equals("")){
+//            Intent intent = new Intent(this, IPGetterActivity.class);
+//            startActivity(intent);
+//        }
+
+        RetrofitBuilder.clientInterface = new RetrofitBuilder("http://10.0.2.2:8080");
+
         String token = userData.getString(TOKEN, "");
-        //System.out.println("###"+token+"###");
         Cookies.setSessionToken(token);
-        if(token.equals("")){// || !clientInterface.validateToken().getMessage().equals(Messages.SUCCESS)){
-            Intent intent = new Intent(this, LoginActivity.class);
-            startActivity(intent);
-        }
-        int profileId = userData.getInt(PROFILE_ID, 0);
-        Cookies.setProfileId(profileId);
-        if(profileId == 0) {
+
+        RetrofitBuilder.clientInterface.asyncValidateTokenAsync(new ValidateTokenCallback() {
+            @Override
+            public void onSuccess(Messages message) {
+                Toast.makeText(MainActivity.this, "Token validate message: " + message.getMessage(), Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onFailure(Messages message) {
+                System.out.println(message);
+                if (message == Messages.UNAUTHORIZED) {
+                    Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                    startActivity(intent);
+                }
+                else {
+                    Toast.makeText(MainActivity.this, message.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        Cookies.setProfileId(userData.getInt(PROFILE_ID, 0));
+        if(Cookies.getProfileId() <= 0) {
             Intent intent = new Intent(this, CreateProfileActivity.class);
             startActivity(intent);
         }
@@ -104,6 +119,8 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
         progressBar = findViewById(R.id.idLoadingPB);
 
+        setContentView(R.layout.activity_feed);
+
         // calling method to load data in recycler view.
         getFeeds();
 
@@ -118,10 +135,10 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     }
 
     private void getFeeds() {
-        progressBar.setVisibility(View.GONE);
+//        progressBar.setVisibility(View.GONE);
         FeedModalArrayList = new ArrayList<>();
 
-        RetrofitBuilder.clientInterface.asyncCallDownload("kir.jpg");
+//        RetrofitBuilder.clientInterface.asyncCallDownload("kir.jpg");
 
         RetrofitBuilder.clientInterface.asyncGetWatchList(new WatchListCallback() {
             @Override

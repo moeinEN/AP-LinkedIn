@@ -22,9 +22,11 @@
             android:name=".CreateProfileActivity"
             android:exported="false" />
         <activity
+            android:theme="@style/Theme.Design.Light.NoActionBar"
             android:name=".SignUpActivity"
             android:exported="false" />
         <activity
+            android:theme="@style/Theme.Design.Light.NoActionBar"
             android:name=".LoginActivity"
             android:exported="false" />
         <activity

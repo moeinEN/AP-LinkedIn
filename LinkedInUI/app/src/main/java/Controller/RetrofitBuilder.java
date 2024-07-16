@@ -18,6 +18,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -35,16 +36,15 @@ public class RetrofitBuilder {
     }
 
     private Retrofit retrofitBuilder() {
-
-
-
-        OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
-
         Gson gson = new GsonBuilder().setDateFormat("MMM d, yyyy, hh:mm:ss a").create();
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .client(httpClient.build())
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(new OkHttpClient.Builder()
+                        .readTimeout(30, TimeUnit.SECONDS)
+                        .writeTimeout(30, TimeUnit.SECONDS)
+                        .connectTimeout(30, TimeUnit.SECONDS)
+                        .build())
                 .build();
         return retrofit;
     }
@@ -150,24 +150,42 @@ public class RetrofitBuilder {
         });
     }
 
-    public Messages validateToken() {
+    public void asyncValidateTokenAsync(final ValidateTokenCallback callback) {
         UserService service = retrofit.create(UserService.class);
         Call<ResponseBody> callValidate = service.validateToken(Cookies.getSessionToken());
-        Messages serverResponse;
-        try {
-            Response<ResponseBody> response = callValidate.execute();
-            if (response.isSuccessful() && response.body() != null) {
-                byte[] responseBodyBytes = response.body().bytes();
-                Gson gson = new GsonBuilder().setDateFormat("E MMM dd HH:mm:ss z yyyy").create();
-                serverResponse = gson.fromJson(new String(responseBodyBytes), Messages.class);
-                return serverResponse;
-            } else {
-                return Messages.INTERNAL_ERROR;
+
+        callValidate.enqueue(new retrofit2.Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    try {
+                        byte[] responseBodyBytes = response.body().bytes();
+                        Gson gson = new GsonBuilder().setDateFormat("E MMM dd HH:mm:ss z yyyy").create();
+                        Messages serverResponse = gson.fromJson(new String(responseBodyBytes), Messages.class);
+                        callback.onSuccess(serverResponse);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        callback.onFailure(Messages.INTERNAL_ERROR);
+                    }
+                } else {
+                    byte[] responseBodyBytes = null;
+                    try {
+                        responseBodyBytes = response.errorBody().bytes();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    Gson gson = new GsonBuilder().setDateFormat("E MMM dd HH:mm:ss z yyyy").create();
+                    Messages serverResponse = gson.fromJson(new String(responseBodyBytes), Messages.class);
+                    callback.onFailure(serverResponse);
+                }
             }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return Messages.INTERNAL_ERROR;
-        }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                t.printStackTrace();
+                callback.onFailure(Messages.INTERNAL_ERROR);
+            }
+        });
     }
 
     public void asyncCallProfile(CreateProfileRequest profile, ProfileCallback callback) {
@@ -487,8 +505,10 @@ Gson gson = new GsonBuilder().setDateFormat("E MMM dd HH:mm:ss z yyyy").create()
                 if (response.isSuccessful() && response.body() != null) {
                     try {
                         String responseBody = response.body().string();
-        Gson gson = new GsonBuilder().setDateFormat("E MMM dd HH:mm:ss z yyyy").create();                        JsonObject jsonObject = gson.fromJson(responseBody, JsonObject.class);
+                        Gson gson = new GsonBuilder().setDateFormat("E MMM dd HH:mm:ss z yyyy").create();
+                        JsonObject jsonObject = gson.fromJson(responseBody, JsonObject.class);
                         int profileId = jsonObject.get("profileId").getAsInt();
+                        Cookies.setProfileId(profileId);
                         callback.onSuccess(profileId);
                     } catch (IOException e) {
                         callback.onError("Error parsing response: " + e.getMessage());

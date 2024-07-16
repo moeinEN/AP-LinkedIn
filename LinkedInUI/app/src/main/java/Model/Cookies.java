@@ -1,31 +1,26 @@
 package Model;
 
+import lombok.Getter;
+import lombok.Setter;
+
+
 public class Cookies {
     private static String sessionToken;
-    private static String profileIdentification;
-    private static int profileId;
-
-    public static void setSessionToken(String sessionToken) {
-        Cookies.sessionToken = sessionToken;
-    }
+    private static Integer profileId;
 
     public static String getSessionToken() {
         return sessionToken;
     }
 
-    public static String getProfileIdentification() {
-        return profileIdentification;
+    public static void setSessionToken(String sessionToken) {
+        Cookies.sessionToken = sessionToken;
     }
 
-    public static void setProfileIdentification(String profileIdentification) {
-        Cookies.profileIdentification = profileIdentification;
-    }
-
-    public static int getProfileId() {
+    public static Integer getProfileId() {
         return profileId;
     }
 
-    public static void setProfileId(int profileId) {
+    public static void setProfileId(Integer profileId) {
         Cookies.profileId = profileId;
     }
 }

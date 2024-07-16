@@ -16,7 +16,7 @@ public class SignUpController {
         String pPattern = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$";
         java.util.regex.Pattern p = java.util.regex.Pattern.compile(pPattern);
         java.util.regex.Matcher m = p.matcher(password);
-        return m.matches();
+        return m.matches() && !password.contains(" ");
     }
 
     // Name or familyName must not contain symbols except (') or (.)

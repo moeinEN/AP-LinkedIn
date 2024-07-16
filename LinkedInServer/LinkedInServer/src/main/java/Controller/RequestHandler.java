@@ -757,7 +757,7 @@ public class RequestHandler {
             }        }
     }
     public static void validateToken(HttpExchange exchange) throws IOException, SQLException {
-        if ("GET".equals(exchange.getRequestMethod())) {
+        if ("POST".equals(exchange.getRequestMethod())) {
             byte[] response;
             int responseCode;
 
@@ -791,7 +791,7 @@ public class RequestHandler {
             Headers requestHeaders = exchange.getRequestHeaders();
 //            int userId = JwtHandler.validateSessionToken(requestHeaders);
             int userId = 1;
-            if (userId == -1 && false) {
+            if (userId == -1) {
                 exchange.sendResponseHeaders(401, -1); // 401 unauthorized
                 return;
             } else {
@@ -823,15 +823,16 @@ public class RequestHandler {
         }
     }
     public static void getUserProfileId(HttpExchange exchange) throws IOException, SQLException {
-        if ("POST".equals(exchange.getRequestMethod())) {
+        if ("GET".equals(exchange.getRequestMethod())) {
             byte[] response;
             int responseCode;
 
             Headers requestHeaders = exchange.getRequestHeaders();
             int userId = JwtHandler.validateSessionToken(requestHeaders);
             if (userId == -1) {
-                response = UNAUTHORIZED.toByte("UTF-8");
                 responseCode = UNAUTHORIZED.getStatusCode();
+                exchange.sendResponseHeaders(responseCode, -1);
+                return;
             } else {
                 try (InputStream requestBody = exchange.getRequestBody();
                      InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
@@ -843,28 +844,26 @@ public class RequestHandler {
                         response = jsonResponse.getBytes("UTF-8");
                         responseCode = SUCCESS.getStatusCode();
                     } catch (SQLException e) {
-                        response = INTERNAL_ERROR.toByte("UTF-8");
                         responseCode = INTERNAL_ERROR.getStatusCode();
+                        exchange.sendResponseHeaders(responseCode, -1);
+                        return;
                     } catch (IllegalArgumentException e) {
-                        response = BAD_REQUEST.toByte("UTF-8");
                         responseCode = BAD_REQUEST.getStatusCode();
+                        exchange.sendResponseHeaders(responseCode, -1);
+                        return;
                     }
                 } catch (IOException e) {
-                    response = BAD_REQUEST.toByte("UTF-8");
                     responseCode = BAD_REQUEST.getStatusCode();
+                    exchange.sendResponseHeaders(responseCode, -1);
+                    return;
                 }
             }
-            exchange.getResponseHeaders().set("Content-Type", "application/json");
             exchange.sendResponseHeaders(responseCode, response.length);
             try (OutputStream os = exchange.getResponseBody()) {
                 os.write(response);
             }
         } else {
-            byte[] response = METHOD_NOT_ALLOWED.toByte("UTF-8");
-            exchange.sendResponseHeaders(METHOD_NOT_ALLOWED.getStatusCode(), response.length); // 405 Method Not Allowed
-            try (OutputStream os = exchange.getResponseBody()) {
-                os.write(response);
-            }
+            exchange.sendResponseHeaders(METHOD_NOT_ALLOWED.getStatusCode(), -1); // 405 Method Not Allowed
         }
     }
 }
